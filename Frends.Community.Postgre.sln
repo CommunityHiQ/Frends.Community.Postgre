@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FRENDS.Community.Postgre", "Frends.Community.Postgre\FRENDS.Community.Postgre.csproj", "{30071232-AFDB-4AC4-A48D-BCF9D55CDAD1}"
 EndProject
@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AD988466-462E-48C9-9268-8F420E340A67}"
 	ProjectSection(SolutionItems) = preProject
 		Frends.Community.Postgre.nuspec = Frends.Community.Postgre.nuspec
+		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
 EndProject
