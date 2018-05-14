@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Xml;
 using NUnit.Framework;
+using System.Diagnostics;
 
 namespace Frends.Community.Postgre.Tests
 {
@@ -10,9 +11,9 @@ namespace Frends.Community.Postgre.Tests
         [TestFixture]
         public class PostgreOperationsTests
         {
-            private readonly PostgreOperations.ConnectionInformation _connection = new PostgreOperations.ConnectionInformation
+            private readonly ConnectionInformation _connection = new ConnectionInformation
             {
-                ConnectionString = "Host=localhost;Username=testi;Password=test123;Database=frendstest",
+                ConnectionString = "Server=testpostgr01.postgres.database.azure.com;Port=5432;User Id=testpostgr01@testpostgr01;Password=xRYiuJop8#1;Database=Test;SslMode=Require;",
                 TimeoutSeconds = 10
             };
 
@@ -22,18 +23,19 @@ namespace Frends.Community.Postgre.Tests
             [Test]
             public void QuerydataThreeRows()
             {
-                var input = new PostgreOperations.Input
+                var input = new QueryParameters
                 {
-                    Query = "SELECT * FROM lista",
+                    Query = "SELECT * FROM lista;",
                     Parameters = null,
-                    ReturnType = PostgreOperations.PostgreQueryReturnType.XMLString
+                    ReturnType = PostgreQueryReturnType.XMLString
                 };
 
-                string result = PostgreOperations.QueryData(input, _connection, new CancellationToken()).Result;
+                Output result = PostgreOperations.QueryData(_connection,input, new CancellationToken()).Result;
 
-                Assert.IsTrue(result.Contains("<id>1</id>"));
-                Assert.IsTrue(result.Contains("<id>2</id>"));
-                Assert.IsTrue(result.Contains("<id>3</id>"));
+
+                Assert.IsTrue(result.Result.Contains("<id>1</id>"));
+                Assert.IsTrue(result.Result.Contains("<id>2</id>"));
+                Assert.IsTrue(result.Result.Contains("<id>3</id>"));
             }
 
             /// <summary>
@@ -42,17 +44,18 @@ namespace Frends.Community.Postgre.Tests
             [Test]
             public void QuerydataNoRows()
             {
-                var input = new PostgreOperations.Input
+                var input = new QueryParameters
                 {
                     Query = "SELECT * from lista WHERE id='||:ehto||'",
-                    Parameters = new[] {new PostgreOperations.Parameter {Name = "ehto", Value = "0"}},
-                    ReturnType = PostgreOperations.PostgreQueryReturnType.XMLString
+                    Parameters = new[] { new Parameter { Name = "ehto", Value = "0"}},
+                    ReturnType = PostgreQueryReturnType.XMLString
                 };
 
-                string result = PostgreOperations.QueryData(input, _connection, new CancellationToken()).Result;
+
+                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
 
                 var table = new XmlDocument();
-                table.LoadXml(result);
+                table.LoadXml(result.Result.ToString());
                 var node = table.SelectSingleNode("//*[local-name()='row'][1]");
                 Assert.IsTrue(node == null);
             }
@@ -63,20 +66,21 @@ namespace Frends.Community.Postgre.Tests
             [Test]
             public void QuerydataOneRowXmlDocument()
             {
-                var input = new PostgreOperations.Input
+                var input = new QueryParameters
                 {
                     Query = "SELECT * FROM lista WHERE selite LIKE '||:ehto||' OR selite LIKE '||:toinenehto||'",
                     Parameters = new[]
                     {
-                        new PostgreOperations.Parameter {Name = "ehto", Value = "foobar"},
-                        new PostgreOperations.Parameter {Name = "toinenehto", Value = "'%Ensimm%'"}
+                        new Parameter {Name = "ehto", Value = "'foobar'"},
+                        new Parameter {Name = "toinenehto", Value = "'%Ensimm%'"}
                     },
-                    ReturnType = PostgreOperations.PostgreQueryReturnType.XMLDocument
+                    ReturnType = PostgreQueryReturnType.XMLString
                 };
 
-                XmlDocument result = PostgreOperations.QueryData(input, _connection, new CancellationToken()).Result;
-
-                var node = result.SelectSingleNode("//*[local-name()='row'][1]");
+                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(result.Result);
+                var node = doc.SelectSingleNode("//*[local-name()='row'][0]");
                 Assert.IsTrue(node != null);
                 var value = node.SelectSingleNode("*[local-name()='id']");
                 Assert.IsTrue(value != null && value.InnerText == "1");
@@ -88,20 +92,23 @@ namespace Frends.Community.Postgre.Tests
             [Test]
             public void QuerydataOneRowJSON()
             {
-                var input = new PostgreOperations.Input
+                var input = new QueryParameters
                 {
-                    Query = "SELECT * FROM lista WHERE selite LIKE '||:ehto||' OR selite LIKE '||:toinenehto||'",
+                    Query = "SELECT * FROM lista WHERE selite LIKE :ehto OR selite LIKE '||:toinenehto||' ",
                     Parameters = new[]
                     {
-                        new PostgreOperations.Parameter {Name = "ehto", Value = "foobar"},
-                        new PostgreOperations.Parameter {Name = "toinenehto", Value = "'%Ensimm%'"}
+                        new Parameter {Name = "ehto", Value = "foobar"},
+                        new Parameter {Name = "toinenehto", Value = "'%Ensimm%'"}
                     },
-                    ReturnType = PostgreOperations.PostgreQueryReturnType.JSONString
+                    ReturnType = PostgreQueryReturnType.JSONString
                 };
 
-                string result = PostgreOperations.QueryData(input, _connection, new CancellationToken()).Result;
+                Output result = PostgreOperations.QueryData( _connection, input, new CancellationToken()).Result;
 
-                Assert.IsTrue(result.Contains("\"row\":{\"id\":\"1\","));
+
+                TestContext.Out.WriteLine("RESULT: "+result.Result);
+
+                Assert.IsTrue(result.Result.Contains("[{{\"id\":1,"));
             }
         }
     }
