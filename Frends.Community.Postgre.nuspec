@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Frends.Community.Postgre</id>
-    <version>1.0.1</version>
+    <version>0.0.2</version>
     <title>Frends.Community.Postgre</title>
     <authors>HiQ Finland</authors>
     <owners />
@@ -17,5 +17,7 @@
   </metadata>
   <files>
     <file src="Frends.Community.Postgre\bin\Release\Frends.Community.Postgre.dll" target="lib\net452\Frends.Community.Postgre.dll" />
+	  <file src="Frends.Community.Postgre\bin\Release\Npgsql.dll" target="lib\net452\Npgsql.dll" />
+	  <file src="Frends.Community.Postgre\bin\Release\System.Threading.Tasks.Extensions.dll" target="lib\net452\System.Threading.Tasks.Extensions.dll" />
   </files>
 </package>
