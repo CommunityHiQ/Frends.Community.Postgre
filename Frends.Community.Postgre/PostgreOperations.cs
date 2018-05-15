@@ -10,9 +10,7 @@ namespace Frends.Community.Postgre
     public class PostgreOperations
     {
         /// <summary>
-        /// Query data using PostgreSQL. Example SELECT * FROM table WHERE "id" = '||:condition||'
-        /// Note: Normal query requires double quotes around Column and 2 single quotes around Value. Example: SELECT * FROM table WHERE "Column" = ''Value''
-        ///       Query with params Example: SELECT * FROM table WHERE "Column" = '||:Value||' 
+        /// Query data using PostgreSQL. Example SELECT * FROM table WHERE id =:condition
         /// </summary>
         /// <param name="queryParameters"></param>
         /// <param name="connectionInfo"></param>
