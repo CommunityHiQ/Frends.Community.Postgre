@@ -32,6 +32,8 @@ namespace Frends.Community.Postgre.Tests
 
                 Output result = PostgreOperations.QueryData(_connection,input, new CancellationToken()).Result;
 
+                TestContext.Out.WriteLine("RESULT: " + result.Result);
+
 
                 Assert.IsTrue(result.Result.Contains("<id>1</id>"));
                 Assert.IsTrue(result.Result.Contains("<id>2</id>"));
@@ -46,17 +48,19 @@ namespace Frends.Community.Postgre.Tests
             {
                 var input = new QueryParameters
                 {
-                    Query = "SELECT * from lista WHERE id='||:ehto||'",
-                    Parameters = new[] { new Parameter { Name = "ehto", Value = "0"}},
+                    Query = "SELECT * from lista WHERE id=:ehto",
+                    Parameters = new[] { new Parameter { Name = "ehto", Value = 0}},
                     ReturnType = PostgreQueryReturnType.XMLString
                 };
 
 
                 Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
 
+                TestContext.Out.WriteLine("RESULT: " + result.Result);
+
                 var table = new XmlDocument();
                 table.LoadXml(result.Result.ToString());
-                var node = table.SelectSingleNode("//*[local-name()='row'][1]");
+                var node = table.SelectSingleNode("/Root/Row[1]/id");
                 Assert.IsTrue(node == null);
             }
 
@@ -68,11 +72,11 @@ namespace Frends.Community.Postgre.Tests
             {
                 var input = new QueryParameters
                 {
-                    Query = "SELECT * FROM lista WHERE selite LIKE '||:ehto||' OR selite LIKE '||:toinenehto||'",
+                    Query = "SELECT * FROM lista WHERE selite LIKE :ehto OR selite LIKE :toinenehto",
                     Parameters = new[]
                     {
-                        new Parameter {Name = "ehto", Value = "'foobar'"},
-                        new Parameter {Name = "toinenehto", Value = "'%Ensimm%'"}
+                        new Parameter {Name = "ehto", Value = "foobar"},
+                        new Parameter {Name = "toinenehto", Value = "%Ensimm%"}
                     },
                     ReturnType = PostgreQueryReturnType.XMLString
                 };
@@ -80,10 +84,11 @@ namespace Frends.Community.Postgre.Tests
                 Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(result.Result);
-                var node = doc.SelectSingleNode("//*[local-name()='row'][0]");
+                TestContext.Out.WriteLine("RESULT: " + result.Result);
+                var node = doc.SelectSingleNode("/Root/Row[1]/id");
                 Assert.IsTrue(node != null);
-                var value = node.SelectSingleNode("*[local-name()='id']");
-                Assert.IsTrue(value != null && value.InnerText == "1");
+                var value = node.SelectSingleNode("//id");
+                 Assert.IsTrue(value != null && value.InnerText == "1");
             }
 
             /// <summary>
@@ -94,11 +99,11 @@ namespace Frends.Community.Postgre.Tests
             {
                 var input = new QueryParameters
                 {
-                    Query = "SELECT * FROM lista WHERE selite LIKE :ehto OR selite LIKE '||:toinenehto||' ",
+                    Query = "SELECT * FROM lista WHERE selite LIKE :ehto OR selite LIKE :toinenehto ",
                     Parameters = new[]
                     {
                         new Parameter {Name = "ehto", Value = "foobar"},
-                        new Parameter {Name = "toinenehto", Value = "'%Ensimm%'"}
+                        new Parameter {Name = "toinenehto", Value = "%Ensimm%"}
                     },
                     ReturnType = PostgreQueryReturnType.JSONString
                 };
@@ -108,7 +113,7 @@ namespace Frends.Community.Postgre.Tests
 
                 TestContext.Out.WriteLine("RESULT: "+result.Result);
 
-                Assert.IsTrue(result.Result.Contains("[{{\"id\":1,"));
+                Assert.IsTrue(result.Result.Contains("\"id\": 1"));
             }
         }
     }
