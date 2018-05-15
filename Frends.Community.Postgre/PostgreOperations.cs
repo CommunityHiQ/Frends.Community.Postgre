@@ -36,7 +36,7 @@ namespace Frends.Community.Postgre
                     {
                         foreach (var parameter in queryParameters.Parameters)
                         {
-                            cmd.Parameters.AddWithValue(parameter.Name, "'" + parameter.Value + "'");
+                            cmd.Parameters.AddWithValue(parameter.Name, parameter.Value );
                         }
                     }
 
@@ -45,16 +45,16 @@ namespace Frends.Community.Postgre
                     var reader = cmd.ExecuteReader();
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    // Return the desired type
-                    switch (queryParameters.ReturnType)
-                    {
-                        case PostgreQueryReturnType.XMLString:
-                            return new Output() { Result = reader.ToXml(queryParameters.CultureInfo) };
-                        case PostgreQueryReturnType.JSONString:
-                            return new Output() { Result = reader.ToJson(queryParameters.CultureInfo) };
-                        default:
-                            throw new ArgumentException("Task 'Return Type' was invalid! Check task properties.");
-                    }
+                     // Return the desired type
+                     switch (queryParameters.ReturnType)
+                     {
+                         case PostgreQueryReturnType.XMLString:
+                             return new Output() { Result = reader.ToXml(queryParameters.CultureInfo) };
+                         case PostgreQueryReturnType.JSONString:
+                             return new Output() { Result = reader.ToJson(queryParameters.CultureInfo) };
+                         default:
+                             throw new ArgumentException("Task 'Return Type' was invalid! Check task properties.");
+                     }
                 }
             }
         }
