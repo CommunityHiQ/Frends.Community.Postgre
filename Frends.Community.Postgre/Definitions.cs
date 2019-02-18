@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Frends.Tasks.Attributes;
 
 namespace Frends.Community.Postgre
 {
@@ -46,7 +45,7 @@ namespace Frends.Community.Postgre
         [DefaultValue(PostgreQueryReturnType.XMLString)]
         public PostgreQueryReturnType ReturnType { get; set; }
         /// <summary>
-        /// Specify the culture info to be used when parsing result to JSON and to XML. If this is left empty InvariantCulture will be used. List of cultures: https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx Use the Language Culture Name.
+        /// Specify the culture info to be used when parsing result to JSON and to XML. If this is left empty InvariantCulture will be used. Use the Language Culture Name, like en-US.
         /// </summary>
         [DefaultValue(null)]
         public string CultureInfo { get; set; }
@@ -76,6 +75,6 @@ namespace Frends.Community.Postgre
         /// <summary>
         /// Request result
         /// </summary>
-        public dynamic Result { get; set; }
+        public string Result { get; set; }
     }
 }

@@ -10,12 +10,12 @@ namespace Frends.Community.Postgre
     public class PostgreOperations
     {
         /// <summary>
-        /// Query data using PostgreSQL. Example SELECT * FROM table WHERE id =:condition
+        /// Query data using PostgreSQL. Documentation: https://github.com/CommunityHiQ/Frends.Community.Postgre
         /// </summary>
         /// <param name="queryParameters"></param>
         /// <param name="connectionInfo"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <returns>Object {string Result}</returns>
         public static async Task<dynamic> QueryData(ConnectionInformation connectionInfo, QueryParameters queryParameters, CancellationToken cancellationToken)
         {
             using (var conn = new NpgsqlConnection(connectionInfo.ConnectionString))

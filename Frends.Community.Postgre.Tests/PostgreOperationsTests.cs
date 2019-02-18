@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using System.Xml;
 using NUnit.Framework;
-using System.Diagnostics;
 
 namespace Frends.Community.Postgre.Tests
 {
@@ -13,8 +12,7 @@ namespace Frends.Community.Postgre.Tests
         {
             private readonly ConnectionInformation _connection = new ConnectionInformation
             {
-                ConnectionString = "Server=testpostgr01.postgres.database.azure.com;Port=5432;User Id=testpostgr01@testpostgr01;Password=xRYiuJop8#1;Database=Test;SslMode=Require;",
-                TimeoutSeconds = 10
+                ConnectionString = @"User ID = postgres; Password=pw;Host=localhost;Port=5432;Database=postgres", TimeoutSeconds = 10
             };
 
             /// <summary>
