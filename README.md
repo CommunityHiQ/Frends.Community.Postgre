@@ -88,6 +88,6 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | ---------------------| ---------------------|
 | 1.0.0 | Initial Frends.Community version of PostgreOperations |
 | 1.0.1 | Implemented ToJson and ToXml extensions, refactored main code, removed return types 'XDocument', 'XmlDocument' and 'Dynamic', updated documentation and added license information |
-| 1.1.0 | Updated documentation and fixed nuged dependencies. First pubic release. |
-
+| 1.1.0 | Updated documentation and fixed nuget dependencies. First pubic release. |
+| 1.2.0 | Fixed nuget dependencies again. |
 
