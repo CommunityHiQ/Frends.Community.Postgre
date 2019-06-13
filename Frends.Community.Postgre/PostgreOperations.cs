@@ -1,5 +1,6 @@
 ﻿using Npgsql;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,10 +14,11 @@ namespace Frends.Community.Postgre
         /// Query data using PostgreSQL. Documentation: https://github.com/CommunityHiQ/Frends.Community.Postgre
         /// </summary>
         /// <param name="queryParameters"></param>
+        /// <param name="output"></param>
         /// <param name="connectionInfo"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Object {string Result}</returns>
-        public static async Task<dynamic> QueryData(ConnectionInformation connectionInfo, QueryParameters queryParameters, CancellationToken cancellationToken)
+        public static async Task<dynamic> QueryData([PropertyTab] QueryParameters queryParameters, [PropertyTab] OutputProperties output, [PropertyTab] ConnectionInformation connectionInfo, CancellationToken cancellationToken)
         {
             using (var conn = new NpgsqlConnection(connectionInfo.ConnectionString))
             {
@@ -38,21 +40,24 @@ namespace Frends.Community.Postgre
                         }
                     }
 
-                    // Execute command.
-                    //var reader = await cmd.ExecuteReaderAsync(cancellationToken);
-                    var reader = cmd.ExecuteReader();
-                    cancellationToken.ThrowIfCancellationRequested();
+                    string queryResult;
 
-                     // Return the desired type
-                     switch (queryParameters.ReturnType)
+                    switch (output.ReturnType)
                      {
-                         case PostgreQueryReturnType.XMLString:
-                             return new Output() { Result = reader.ToXml(queryParameters.CultureInfo) };
-                         case PostgreQueryReturnType.JSONString:
-                             return new Output() { Result = reader.ToJson(queryParameters.CultureInfo) };
+                         case QueryReturnType.Xml:
+                             queryResult = await cmd.ToXmlAsync(output, cancellationToken);
+                             break;
+                         case QueryReturnType.Json:
+                             queryResult = await cmd.ToJsonAsync(output, cancellationToken);
+                             break;
+                         case QueryReturnType.Csv:
+                             queryResult = await cmd.ToCsvAsync(output, cancellationToken);
+                             break;
                          default:
                              throw new ArgumentException("Task 'Return Type' was invalid! Check task properties.");
                      }
+
+                     return new Output { Result = queryResult };
                 }
             }
         }

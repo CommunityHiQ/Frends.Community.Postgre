@@ -12,7 +12,8 @@ namespace Frends.Community.Postgre.Tests
         {
             private readonly ConnectionInformation _connection = new ConnectionInformation
             {
-                ConnectionString = @"User ID = postgres; Password=pw;Host=localhost;Port=5432;Database=postgres", TimeoutSeconds = 10
+                ConnectionString = @"User ID = postgres; Password=pw;Host=localhost;Port=5432;Database=postgres",
+                TimeoutSeconds = 10
             };
 
             /// <summary>
@@ -24,11 +25,20 @@ namespace Frends.Community.Postgre.Tests
                 var input = new QueryParameters
                 {
                     Query = "SELECT * FROM lista;",
-                    Parameters = null,
-                    ReturnType = PostgreQueryReturnType.XMLString
+                    Parameters = null
                 };
 
-                Output result = PostgreOperations.QueryData(_connection,input, new CancellationToken()).Result;
+                var output = new OutputProperties
+                {
+                    ReturnType = QueryReturnType.Xml,
+                    XmlOutput = new XmlOutputProperties
+                    {
+                        RootElementName = "ROW",
+                        RowElementName = "ROWSET",
+                    }
+                };
+
+                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
 
@@ -48,11 +58,19 @@ namespace Frends.Community.Postgre.Tests
                 {
                     Query = "SELECT * from lista WHERE id=:ehto",
                     Parameters = new[] { new Parameter { Name = "ehto", Value = 0}},
-                    ReturnType = PostgreQueryReturnType.XMLString
                 };
 
+                var output = new OutputProperties
+                {
+                    ReturnType = QueryReturnType.Xml,
+                    XmlOutput = new XmlOutputProperties
+                    {
+                        RootElementName = "Root",
+                        RowElementName = "Row",
+                    }
+                };
 
-                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
 
@@ -76,10 +94,19 @@ namespace Frends.Community.Postgre.Tests
                         new Parameter {Name = "ehto", Value = "foobar"},
                         new Parameter {Name = "toinenehto", Value = "%Ensimm%"}
                     },
-                    ReturnType = PostgreQueryReturnType.XMLString
                 };
 
-                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+                var output = new OutputProperties
+                {
+                    ReturnType = QueryReturnType.Xml,
+                    XmlOutput = new XmlOutputProperties
+                    {
+                        RootElementName = "Root",
+                        RowElementName = "Row",
+                    }
+                };
+
+                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(result.Result);
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
@@ -102,12 +129,19 @@ namespace Frends.Community.Postgre.Tests
                     {
                         new Parameter {Name = "ehto", Value = "foobar"},
                         new Parameter {Name = "toinenehto", Value = "%Ensimm%"}
-                    },
-                    ReturnType = PostgreQueryReturnType.JSONString
+                    }
                 };
 
-                Output result = PostgreOperations.QueryData( _connection, input, new CancellationToken()).Result;
+                var output = new OutputProperties
+                {
+                    ReturnType = QueryReturnType.Json,
+                    JsonOutput = new JsonOutputProperties()
+                    {
+                        CultureInfo = "",
+                    }
+                };
 
+                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: "+result.Result);
 

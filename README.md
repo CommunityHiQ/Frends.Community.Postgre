@@ -5,6 +5,7 @@
          - [Input](#input)
          - [ConnectionInformation](#connectioninformation)
          - [Output](#output)
+		 - [Result](#result)
    - [License](#license)
    - [Building](#building)
    - [Contributing](#contributing)
@@ -26,12 +27,6 @@ https://www.myget.org/F/frends/api/v3/index.json
 |-------------------|---------|-----------------------------------------|-----------------------------|
 | Query				| string	| Postgre query string	| ´SELECT * FROM table WHERE \"Column\" = ''Value''´ |
 | Parameters		| Array(string,string)	| List of inputs parameters	| `input` `message` |
-| ReturnType		| XMLString, JSONString	| Query return type	| JSONString |
-| ReturnType		| string | Specify the culture info to be used when parsing result to JSON and to XML. If this is left empty InvariantCulture will be used. List of cultures: https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx Use the Language Culture Name.	| en-US |
-
-
-
-
 
 #### ConnectionInformation
 
@@ -41,6 +36,35 @@ https://www.myget.org/F/frends/api/v3/index.json
 | TimeoutSeconds	  | int		| Timeout in seconds		| 30 |
 
 #### Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Return type | enum<Json, Xml, Csv> | Data return type format | `Json` |
+| OutputToFile | bool | true to write results to a file, false to return results to executin process | `true` |
+
+##### Xml Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| RootElementName | string | Xml root element name | `items` |
+| RowElementName |string | Xml row element name | `item` |
+
+##### Json Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Culture info | string | Specify the culture info to be used when parsing result to JSON. If this is left empty InvariantCulture will be used. [List of cultures](https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx) Use the Language Culture Name. | `fi-FI` |
+
+##### Csv Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| IncludeHeaders | bool | Include field names in the first row | `true` |
+| CsvSeparator | string | Csv separator to use in headers and data items | `;` |
+
+##### Output File
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Path | string | Output path with file name | `c:\temp\output.json` |
+| Encoding | string | Encoding to use for the output file | `utf-8` |
+
+#### Result
 
 | Property          |  Type   | Description								| Example                     |
 |-------------------|---------|-----------------------------------------|-----------------------------|
@@ -90,4 +114,5 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 1.0.1 | Implemented ToJson and ToXml extensions, refactored main code, removed return types 'XDocument', 'XmlDocument' and 'Dynamic', updated documentation and added license information |
 | 1.1.0 | Updated documentation and fixed nuget dependencies. First pubic release. |
 | 1.2.0 | Fixed nuget dependencies again. |
+| 1.3.0 | Added csv return type and option to write result to file. |
 
