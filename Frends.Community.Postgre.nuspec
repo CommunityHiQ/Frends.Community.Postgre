@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Frends.Community.Postgre</id>
-    <version>1.2.2</version>
+    <version>1.2.4</version>
     <title>Frends.Community.Postgre</title>
     <authors>HiQ Finland</authors>
     <owners />
@@ -10,6 +10,7 @@
     <description>Frends.Community.Postgre</description>
     <summary />
     <dependencies>
+      <dependency id="CsvHelper" version="12.1.2" />
       <dependency id="System.Threading.Tasks.Extensions" version="4.5.2" />
       <dependency id="Npgsql" version="4.0.7" />
       <dependency id="Newtonsoft.Json" version="12.0.2"/>

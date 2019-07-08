@@ -38,7 +38,9 @@ namespace Frends.Community.Postgre.Tests
                     }
                 };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
+                var options = new Options { ThrowErrorOnFailure = true };
+
+                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
 
@@ -70,7 +72,9 @@ namespace Frends.Community.Postgre.Tests
                     }
                 };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
+                var options = new Options { ThrowErrorOnFailure = true };
+                
+                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
 
@@ -106,7 +110,9 @@ namespace Frends.Community.Postgre.Tests
                     }
                 };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
+                var options = new Options { ThrowErrorOnFailure = true };
+
+                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(result.Result);
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
@@ -141,7 +147,9 @@ namespace Frends.Community.Postgre.Tests
                     }
                 };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, new CancellationToken()).Result;
+                var options = new Options { ThrowErrorOnFailure = true };
+
+                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: "+result.Result);
 
