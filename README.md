@@ -26,14 +26,14 @@ https://www.myget.org/F/frends/api/v3/index.json
 
 | Property          |  Type   | Description								| Example                     |
 |-------------------|---------|-----------------------------------------|-----------------------------|
-| Query				| string	| Postgre query string	| ´SELECT * FROM table WHERE \"Column\" = ''Value''´ |
+| Query				| string	| Postgre query string	| Â´SELECT * FROM table WHERE \"Column\" = ''Value''Â´ |
 | Parameters		| Array(string,string)	| List of inputs parameters	| `input` `message` |
 
 #### ConnectionInformation
 
 | Property          |  Type   | Description								| Example                     |
 |-------------------|---------|-----------------------------------------|-----------------------------|
-| ConnectionString	  | string	| Postgre connection string | ´Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;´ |
+| ConnectionString	  | string	| Postgre connection string | Â´Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;Â´ |
 | TimeoutSeconds	  | int		| Timeout in seconds		| 30 |
 
 #### Options
@@ -82,7 +82,7 @@ https://www.myget.org/F/frends/api/v3/index.json
 
 ### QueryToFile
 
-Executes query against Postgre database and outputs result to csv.
+Executes query against Postgre database and outputs result to csv. Idea for this is to enable formatting for different data after retreiving it from database. Mainly for datetimes and timestamps in mind.
 
 #### Query Properties
 | Property    | Type       | Description     | Example |
@@ -138,21 +138,19 @@ Ensure that you have https://www.myget.org/F/frends/api/v3/index.json added to y
 
 Clone a copy of the repo
 
-git clone https://github.com/CommunityHiQ/Frends.Community.Postgre.git
-
-Restore dependencies
-
-nuget restore Frends.Community.Postgre
+`git clone https://github.com/CommunityHiQ/Frends.Community.Postgre.git`
 
 Rebuild the project
 
-Run Tests with nunit3. Tests can be found under
+`dotnet build`
 
-Frends.Community.Postgre.Tests\bin\Release\Frends.Community.Postgre.Tests.dll
+Run Tests
 
-Create a nuget package
+`dotnet test`
 
-`nuget pack nuspec/Frends.Community.Postgre.nuspec`
+Create a NuGet package
+
+`dotnet pack --configuration Release`
 
 ## Contributing
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
@@ -174,4 +172,4 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 1.1.0 | Updated documentation and fixed nuget dependencies. First pubic release. |
 | 1.2.0 | Fixed nuget dependencies again. |
 | 1.3.0 | Added csv return type and option to write result to file. |
-
+| 1.4.0 | Updated to include the linux agent and few required fixes to write results to file |

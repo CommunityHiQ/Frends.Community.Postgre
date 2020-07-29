@@ -86,6 +86,7 @@ namespace Frends.Community.Postgre
                 {
                     writer.Formatting = Newtonsoft.Json.Formatting.Indented;
                     writer.Culture = culture;
+                    
 
                     // start array
                     await writer.WriteStartArrayAsync(cancellationToken);
@@ -130,7 +131,6 @@ namespace Frends.Community.Postgre
         {
             // utf-8 as default encoding
             var encoding = string.IsNullOrWhiteSpace(output.OutputFile?.Encoding) ? Encoding.UTF8 : Encoding.GetEncoding(output.OutputFile.Encoding);
-
             using (var reader = await command.ExecuteReaderAsync(cancellationToken))
             using (var w = output.OutputToFile ? new StreamWriter(output.OutputFile.Path, false, encoding) : new StringWriter() as TextWriter)
             {
@@ -170,13 +170,12 @@ namespace Frends.Community.Postgre
         {
             int result;
             command.CommandType = CommandType.Text;
-
+            var encoding = string.IsNullOrWhiteSpace(output?.Encoding) ? Encoding.UTF8 : Encoding.GetEncoding(output.Encoding);
             using (var reader = await command.ExecuteReaderAsync(cancellationToken) as NpgsqlDataReader)
-            using (var writer = new StreamWriter(output.OutputFilePath))
+            using (var writer = new StreamWriter(output.OutputFilePath, false, encoding))
             using (var csvFile = CreateCsvWriter(output.GetFieldDelimiterAsString(), writer))
             {
                 writer.NewLine = output.GetLineBreakAsString();
-
                 result = DataReaderToCsv(reader, csvFile, output, cancellationToken);
 
                 csvFile.Flush();
@@ -296,7 +295,7 @@ namespace Frends.Community.Postgre
                     var dbTypeName = reader.GetDataTypeName(columnIndex);
                     var value = reader.GetValue(columnIndex);
                     var formattedValue = FormatDbValue(value, dbTypeName, dbType, options);
- 
+
                     csvWriter.WriteField(formattedValue, false);
                 }
                 csvWriter.NextRecord();
