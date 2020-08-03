@@ -12,7 +12,7 @@ namespace Frends.Community.Postgre.Tests
         {
             private readonly ConnectionInformation _connection = new ConnectionInformation
             {
-                ConnectionString = @"User ID = postgres; Password=Sitruun4kilju-;Host=localhost;Port=5432;Database=postgres",
+                ConnectionString = @"User ID = postgres; Password=;Host=;Port=;Database=postgres",
                 TimeoutSeconds = 10
             };
 
