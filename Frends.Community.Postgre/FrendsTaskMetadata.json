@@ -2,6 +2,9 @@
 	"Tasks": [
 		{
 			"TaskMethod": "Frends.Community.Postgre.PostgreOperations.QueryData"
+		},
+		{
+			"TaskMethod": "Frends.Community.Postgre.PostgreOperations.QueryToFile"
 		}
 	]
 }
