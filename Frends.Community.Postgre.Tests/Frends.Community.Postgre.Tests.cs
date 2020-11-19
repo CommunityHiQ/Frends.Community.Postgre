@@ -9,12 +9,20 @@ namespace Frends.Community.Postgre.Tests
     [TestFixture]
     public class DataBaseTests
     {
+
+
+        /// <summary>
+        /// These test requires local postgres database, create it e.g. with
+        ///
+        ///  docker run --name mypostgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+        ///
+        /// </summary>
         [TestFixture]
         public class PostgreOperationsTests
         {
             private readonly ConnectionInformation _connection = new ConnectionInformation
             {
-                ConnectionString = Environment.GetEnvironmentVariable("HIQ_POSTGRES_CONNECTION_STRING"),
+                ConnectionString = "Host=localhost;Database=postgres;Port=5432;User Id=postgres;Password=mysecretpassword;",
                 TimeoutSeconds = 10
             };
 
