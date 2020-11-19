@@ -18,6 +18,7 @@ namespace Frends.Community.Postgre.Tests
         ///
         /// </summary>
         [TestFixture]
+        [Ignore("Ignore test as we can't use docker to setup test db on on windows machines in GitHub Actions.")]
         public class PostgreOperationsTests
         {
             private readonly ConnectionInformation _connection = new ConnectionInformation
