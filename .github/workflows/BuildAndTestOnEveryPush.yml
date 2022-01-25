@@ -7,11 +7,14 @@ on:
 
 jobs:
   build:
-    name: Build on windows-latest
-    runs-on: windows-latest
+    name: Build on ubuntu-latest
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v1
+
+    - name: set up docker
+      run: docker run --name mypostgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
     - name: Build
       run: dotnet build

@@ -36,7 +36,15 @@ namespace Frends.Community.Postgre
                     {
                         foreach (var parameter in queryParameters.Parameters)
                         {
-                            cmd.Parameters.AddWithValue(parameter.Name, parameter.Value);
+                            // Convert parameter.Value to DBNull.Value if it is set to null.
+                            if (parameter.Value == null)
+                            {
+                                cmd.Parameters.AddWithValue(parameter.Name, DBNull.Value);
+                            }
+                            else
+                            {
+                                cmd.Parameters.AddWithValue(parameter.Name, parameter.Value);
+                            }
                         }
                     }
 

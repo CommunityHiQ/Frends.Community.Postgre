@@ -9,16 +9,7 @@ namespace Frends.Community.Postgre.Tests
     [TestFixture]
     public class DataBaseTests
     {
-
-
-        /// <summary>
-        /// These test requires local postgres database, create it e.g. with
-        ///
-        ///  docker run --name mypostgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
-        ///
-        /// </summary>
         [TestFixture]
-        [Ignore("Ignore test as we can't use docker to setup test db on on windows machines in GitHub Actions.")]
         public class PostgreOperationsTests
         {
             private readonly ConnectionInformation _connection = new ConnectionInformation
@@ -39,7 +30,7 @@ namespace Frends.Community.Postgre.Tests
                     {
                         cmd.ExecuteNonQuery();
                     }
-                    using (var cmd = new NpgsqlCommand(@"INSERT INTO ""lista"" (Id, Selite) VALUES (1, 'Ensimmäinen'), (2, 'foobar'), (3, '')", conn))
+                    using (var cmd = new NpgsqlCommand(@"INSERT INTO ""lista"" (Id, Selite) VALUES (1, 'Ensimmäinen'), (2, 'foobar'), (3, ''), (4, null)", conn))
                     {
                         cmd.ExecuteNonQuery();
                     }
@@ -160,6 +151,30 @@ namespace Frends.Community.Postgre.Tests
 
                 Assert.IsTrue(result.Result.Contains("\"id\": 1"));
             }
+
+            /// <summary>
+            /// Test null conversion to DBNull.Value
+            /// </summary>
+            [Test]
+            public void QueryDataWithNullParameterValue()
+            {
+                var input = new QueryParameters
+                {
+                    Query = "SELECT * FROM lista WHERE Id=:ehto",
+                    Parameters = new[]
+                    {
+                        new Parameter {Name = "ehto", Value = 4}
+                    },
+                    ReturnType = PostgreQueryReturnType.JSONString
+                };
+
+                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+
+                TestContext.Out.WriteLine("RESULT: " + result.Result);
+
+                Assert.IsTrue(result.Result.Contains("\"selite\": null"));
+            }
+
         }
     }
 }
