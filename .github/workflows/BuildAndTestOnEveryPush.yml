@@ -7,11 +7,14 @@ on:
 
 jobs:
   build:
-    name: Build on windows-latest
-    runs-on: windows-latest
+    name: Build on ubuntu-latest
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v1
+
+    - name: set up docker
+      run: docker run --name mypostgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
     - name: Build
       run: dotnet build
@@ -25,4 +28,4 @@ jobs:
       run: dotnet pack --configuration Release --include-source
       
     - name: Push NuGet package to the testfeed
-      run: dotnet nuget push Frends.Community.Postgre\bin\Release\Frends.Community.Postgre.*.nupkg  --api-key ${{ secrets.COMMUNITY_FEED_API_KEY }} --source https://www.myget.org/F/frends-community-test/api/v2/package --symbol-source https://www.myget.org/F/frends-community-test/symbols/api/v2/package
+      run: dotnet nuget push Frends.Community.Postgre/bin/Release/Frends.Community.Postgre.*.nupkg  --api-key ${{ secrets.COMMUNITY_FEED_API_KEY }} --source https://www.myget.org/F/frends-community-test/api/v2/package --symbol-source https://www.myget.org/F/frends-community-test/symbols/api/v2/package

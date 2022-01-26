@@ -85,5 +85,6 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 1.0.1 | Implemented ToJson and ToXml extensions, refactored main code, removed return types 'XDocument', 'XmlDocument' and 'Dynamic', updated documentation and added license information |
 | 1.1.0 | Updated documentation and fixed nuget dependencies. First pubic release. |
 | 1.2.0 | Fixed nuget dependencies again. |
-| 1.2.1 | Converted to support .Net Standard and .Net Framework 4.7.1
+| 1.2.1 | Converted to support .Net Standard and .Net Framework 4.7.1 |
+| 1.3.1 | Fixed issue #4: Parameter can\'t be NULL by creating parameter.Value check and changing the value to DBNull.Value if null | 
 

@@ -1,6 +1,5 @@
 using Npgsql;
 using NUnit.Framework;
-using System;
 using System.Threading;
 using System.Xml;
 
@@ -9,18 +8,17 @@ namespace Frends.Community.Postgre.Tests
     [TestFixture]
     public class DataBaseTests
     {
-
-
-        /// <summary>
-        /// These test requires local postgres database, create it e.g. with
-        ///
-        ///  docker run --name mypostgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
-        ///
-        /// </summary>
         [TestFixture]
-        [Ignore("Ignore test as we can't use docker to setup test db on on windows machines in GitHub Actions.")]
         public class PostgreOperationsTests
         {
+
+            /// <summary>
+            /// These test requires local postgres database, create it e.g. with
+            ///
+            ///  docker run --name mypostgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+            ///
+            /// </summary>
+
             private readonly ConnectionInformation _connection = new ConnectionInformation
             {
                 ConnectionString = "Host=localhost;Database=postgres;Port=5432;User Id=postgres;Password=mysecretpassword;",
@@ -39,7 +37,7 @@ namespace Frends.Community.Postgre.Tests
                     {
                         cmd.ExecuteNonQuery();
                     }
-                    using (var cmd = new NpgsqlCommand(@"INSERT INTO ""lista"" (Id, Selite) VALUES (1, 'Ensimmäinen'), (2, 'foobar'), (3, '')", conn))
+                    using (var cmd = new NpgsqlCommand(@"INSERT INTO ""lista"" (Id, Selite) VALUES (1, 'Ensimmäinen'), (2, 'foobar'), (3, ''), (4, null)", conn))
                     {
                         cmd.ExecuteNonQuery();
                     }
@@ -75,7 +73,7 @@ namespace Frends.Community.Postgre.Tests
                     ReturnType = PostgreQueryReturnType.XMLString
                 };
 
-                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+                var result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
 
@@ -86,7 +84,7 @@ namespace Frends.Community.Postgre.Tests
             }
 
             /// <summary>
-            /// Check that returns no rows with wrong id
+            /// Check that returns no rows with wrong id.
             /// </summary>
             [Test]
             public void QuerydataNoRows()
@@ -99,7 +97,7 @@ namespace Frends.Community.Postgre.Tests
                 };
 
 
-                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+                var result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
 
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
 
@@ -110,7 +108,7 @@ namespace Frends.Community.Postgre.Tests
             }
 
             /// <summary>
-            /// Check that returns one row as xml
+            /// Check that returns one row as xml.
             /// </summary>
             [Test]
             public void QuerydataOneRowXmlDocument()
@@ -126,8 +124,8 @@ namespace Frends.Community.Postgre.Tests
                     ReturnType = PostgreQueryReturnType.XMLString
                 };
 
-                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
-                XmlDocument doc = new XmlDocument();
+                var result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+                var doc = new XmlDocument();
                 doc.LoadXml(result.Result);
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
                 var node = doc.SelectSingleNode("/Root/Row[1]/id");
@@ -137,7 +135,7 @@ namespace Frends.Community.Postgre.Tests
             }
 
             /// <summary>
-            /// Check that returns one row as xml
+            /// Check that returns one row as xml.
             /// </summary>
             [Test]
             public void QuerydataOneRowJSON()
@@ -153,13 +151,37 @@ namespace Frends.Community.Postgre.Tests
                     ReturnType = PostgreQueryReturnType.JSONString
                 };
 
-                Output result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+                var result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
 
 
                 TestContext.Out.WriteLine("RESULT: " + result.Result);
 
                 Assert.IsTrue(result.Result.Contains("\"id\": 1"));
             }
+
+            /// <summary>
+            /// Test null conversion to DBNull.Value.
+            /// </summary>
+            [Test]
+            public void QueryDataWithNullParameterValue()
+            {
+                var input = new QueryParameters
+                {
+                    Query = "SELECT * FROM lista WHERE Id=:ehto",
+                    Parameters = new[]
+                    {
+                        new Parameter {Name = "ehto", Value = 4}
+                    },
+                    ReturnType = PostgreQueryReturnType.JSONString
+                };
+
+                var result = PostgreOperations.QueryData(_connection, input, new CancellationToken()).Result;
+
+                TestContext.Out.WriteLine("RESULT: " + result.Result);
+
+                Assert.IsTrue(result.Result.Contains("\"selite\": null"));
+            }
+
         }
     }
 }

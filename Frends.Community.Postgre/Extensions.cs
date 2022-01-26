@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Npgsql;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -13,31 +12,34 @@ namespace Frends.Community.Postgre
     {
         public static string ToJson(this NpgsqlDataReader reader, string cultureInfo)
         {
-            var culture = String.IsNullOrWhiteSpace(cultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(cultureInfo);
+            var culture = string.IsNullOrWhiteSpace(cultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(cultureInfo);
 
-            // Create json result
+            // Create JSON result.
             using (var writer = new JTokenWriter())
             {
                 writer.Formatting = Newtonsoft.Json.Formatting.Indented;
                 writer.Culture = culture;
 
-                // Start array
+                // Start array.
                 writer.WriteStartArray();
 
                 while (reader.Read())
                 {
-                    // Start row object
+                    // Start row object.
                     writer.WriteStartObject();
                     for (var i = 0; i < reader.FieldCount; i++)
                     {
-                        // Add row element name
+                        // Add row element name.
                         writer.WritePropertyName(reader.GetName(i));
-                        // Add row element value
+
+                        // Add row element value.
                         writer.WriteValue(reader.GetValue(i) ?? string.Empty);
                     }
-                    writer.WriteEndObject(); // End row object
+
+                    // End row object.
+                    writer.WriteEndObject();
                 }
-                // End array
+                // End array.
                 writer.WriteEndArray();
 
                 return writer.Token.ToString();
@@ -45,37 +47,37 @@ namespace Frends.Community.Postgre
         }
         public static string ToXml(this NpgsqlDataReader reader, string cultureInfo)
         {
-            var culture = String.IsNullOrWhiteSpace(cultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(cultureInfo);
+            var culture = string.IsNullOrWhiteSpace(cultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(cultureInfo);
 
             using (var ms = new MemoryStream())
             {
-                using (var writer = new XmlTextWriter(ms, new UTF8Encoding(false)) { Formatting = System.Xml.Formatting.Indented })
+                using (var writer = new XmlTextWriter(ms, new UTF8Encoding(false)) { Formatting = Formatting.Indented })
                 {
-                    //Start XML document
+                    // Start XML document.
                     writer.WriteStartDocument();
                     writer.WriteStartElement("Root");
 
                     while (reader.Read())
                     {
-                        //Start row element
+                        // Start row element.
                         writer.WriteStartElement("Row");
                         for (var i = 0; i < reader.FieldCount; i++)
                         {
-                            //Get column value
+                            // Get column value.
                             var propertyValue = Convert.ToString(reader.GetValue(i), culture);
-                            //Write column element
+
+                            // Write column element.
                             writer.WriteElementString(reader.GetName(i), reader.GetValue(i).ToString() ?? string.Empty);
                         }
-                        //Close row element
+                        // Close row element.
                         writer.WriteEndElement();
                     }
-                    writer.WriteEndElement();// end Root element
+                    // End Root element.
+                    writer.WriteEndElement();
                     writer.WriteEndDocument();
                 }
                 return Encoding.UTF8.GetString(ms.ToArray());
             }
         }
     }
-
 }
-
