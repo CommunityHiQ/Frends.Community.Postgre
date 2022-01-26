@@ -1,8 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CSharp; // You can remove this if you don't need dynamic type in .NET Standard frends Tasks
 using Npgsql;
 
 #pragma warning disable 1591
@@ -23,8 +21,6 @@ namespace Frends.Community.Postgre
             using (var conn = new NpgsqlConnection(connectionInfo.ConnectionString))
             {
                 await conn.OpenAsync(cancellationToken);
-                cancellationToken.ThrowIfCancellationRequested();
-
                 using (var cmd = new NpgsqlCommand())
                 {
                     cmd.Connection = conn;
@@ -36,6 +32,8 @@ namespace Frends.Community.Postgre
                     {
                         foreach (var parameter in queryParameters.Parameters)
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
+
                             // Convert parameter.Value to DBNull.Value if it is set to null.
                             if (parameter.Value == null)
                             {
@@ -49,11 +47,9 @@ namespace Frends.Community.Postgre
                     }
 
                     // Execute command.
-                    //var reader = await cmd.ExecuteReaderAsync(cancellationToken);
                     var reader = cmd.ExecuteReader();
-                    cancellationToken.ThrowIfCancellationRequested();
 
-                    // Return the desired type
+                    // Return the desired type.
                     switch (queryParameters.ReturnType)
                     {
                         case PostgreQueryReturnType.XMLString:
