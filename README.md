@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 - [Frends.Community.Files.Postgre](#frendscommunitypostgre)
    - [Installing](#installing)
    - [Tasks](#tasks)
@@ -11,9 +12,33 @@
    - [Building](#building)
    - [Contributing](#contributing)
 
+=======
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
 # Frends.Community.Postgre
+
+frends Community Task for PostgreOperations
+
+[![Actions Status](https://github.com/CommunityHiQ/Frends.Community.Postgre/workflows/PackAndPushAfterMerge/badge.svg)](https://github.com/CommunityHiQ/Frends.Community.Postgre/actions) ![MyGet](https://img.shields.io/myget/frends-community/v/Frends.Community.Postgre) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+
+- [Installing](#installing)
+- [Tasks](#tasks)
+     - [PostgreOperations](#PostgreOperations)
+- [Building](#building)
+- [Contributing](#contributing)
+- [Change Log](#change-log)
+
+# Installing
+
+You can install the Task via frends UI Task View or you can find the NuGet package from the following NuGet feed
+https://www.myget.org/F/frends-community/api/v3/index.json and in Gallery view in MyGet https://www.myget.org/feed/frends-community/package/nuget/Frends.Community.Postgre
+
+# Tasks
+
+## PostgreOperations
+
 FRENDS Task for Postgre queries.
 
+<<<<<<< HEAD
 ## Installing
 You can install the task via Frends UI Task view or you can find the nuget package from the following nuget feed
 https://www.myget.org/F/frends/api/v3/index.json
@@ -23,12 +48,16 @@ https://www.myget.org/F/frends/api/v3/index.json
 ### ExecuteQuery
 
 #### QueryParameters
+=======
+### QueryParameters
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
 
 | Property          |  Type   | Description								| Example                     |
 |-------------------|---------|-----------------------------------------|-----------------------------|
 | Query				| string	| Postgre query string	| ´SELECT * FROM table WHERE \"Column\" = ''Value''´ |
 | Parameters		| Array(string,string)	| List of inputs parameters	| `input` `message` |
 
+<<<<<<< HEAD
 #### Query Parameter
 
 | Property    | Type       | Description     | Example |
@@ -66,12 +95,16 @@ https://www.myget.org/F/frends/api/v3/index.json
 | DateTimeFormat | string | Date format to use for formatting DATETIME columns, use .NET formatting tokens. | ´yyyy-MM-dd HH:mm:ss´ |
 
 #### ConnectionInformation
+=======
+### ConnectionInformation
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
 
 | Property          |  Type   | Description								| Example                     |
 |-------------------|---------|-----------------------------------------|-----------------------------|
 | ConnectionString	  | string	| Postgre connection string | ´Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;´ |
 | TimeoutSeconds	  | int		| Timeout in seconds		| 30 |
 
+<<<<<<< HEAD
 #### Options
 
 | Property    | Type       | Description     | Example |
@@ -79,6 +112,10 @@ https://www.myget.org/F/frends/api/v3/index.json
 | Throw error on failure | bool | Specify if Exception should be thrown when error occurs. If set to *false*, task outcome can be checked from #result.Success property. | `false` |
 
 #### Result
+=======
+
+### Output
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
 
 | Property          |  Type   | Description								| Example                     |
 |-------------------|---------|-----------------------------------------|-----------------------------|
@@ -131,33 +168,43 @@ Newlines in text fields are replaced with spaces.
 | Success        | bool     | Result if the task succeeded	| true |
 | Message        | string   | Error message if Throw error on failure is set to 'False'	| XString |
 
-## License
 
-This project is licensed under the MIT License - see the LICENSE file for details
 
-## Building
-Ensure that you have https://www.myget.org/F/frends/api/v3/index.json added to your nuget feeds
 
-Clone a copy of the repo
+# Building
 
+<<<<<<< HEAD
+=======
+Clone a copy of the repository
+
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
 `git clone https://github.com/CommunityHiQ/Frends.Community.Postgre.git`
 
 Rebuild the project
 
 `dotnet build`
 
+<<<<<<< HEAD
 Run Tests
+=======
+Run tests
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
 
 `dotnet test`
 
 Create a NuGet package
+<<<<<<< HEAD
+
+`dotnet pack --configuration Release`
+=======
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
 
 `dotnet pack --configuration Release`
 
-## Contributing
+# Contributing
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
 
-1. Fork the repo on GitHub
+1. Fork the repository on GitHub
 2. Clone the project to your own machine
 3. Commit changes to your own branch
 4. Push your work back up to your fork
@@ -173,5 +220,11 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 1.0.1 | Implemented ToJson and ToXml extensions, refactored main code, removed return types 'XDocument', 'XmlDocument' and 'Dynamic', updated documentation and added license information |
 | 1.1.0 | Updated documentation and fixed nuget dependencies. First pubic release. |
 | 1.2.0 | Fixed nuget dependencies again. |
+<<<<<<< HEAD
 | 1.3.0 | Added csv return type and option to write result to file. |
 | 2.0.0 | Refactored the task and added new task ExecuteQueryToFile which handles all three datatypes. |
+=======
+| 1.2.1 | Converted to support .Net Standard and .Net Framework 4.7.1 |
+| 1.3.1 | Fixed issue #4: Parameter can\'t be NULL by creating parameter.Value check and changing the value to DBNull.Value if null | 
+
+>>>>>>> a8a49e7940f8af3a9029c0efa7681f528f12ee75
