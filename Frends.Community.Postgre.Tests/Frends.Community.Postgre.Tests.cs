@@ -1,22 +1,70 @@
-using System;
+using Frends.Community.Postgre.Definitions;
+using Npgsql;
+using NUnit.Framework;
+using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Threading;
 using System.Xml;
-using NUnit.Framework;
 
 namespace Frends.Community.Postgre.Tests
 {
     [TestFixture]
     public class DataBaseTests
     {
+        /// <summary>
+        /// These test requires local postgres database, create it e.g. with
+        ///
+        ///  docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+        ///
+        /// </summary>
+        
         [TestFixture]
         public class PostgreOperationsTests
         {
-            private readonly ConnectionInformation _connection = new ConnectionInformation
+            private readonly string _connString = "Host=localhost;Database=postgres;Port=5432;User Id=postgres;Password=mysecretpassword;";
+
+            private static ConnectionInformation _connection;
+
+            [OneTimeSetUp]
+            public void TestSetup()
             {
-                ConnectionString = @"User ID = postgres; Password=;Host=localhost;Port=5432;Database=postgres",
-                TimeoutSeconds = 10
-            };
+                _connection = new ConnectionInformation
+                {
+                    ConnectionString = _connString,
+                    TimeoutSeconds = 10
+                };
+
+                using (var conn = new NpgsqlConnection(_connString))
+                {
+                    conn.Open();
+
+                    using (var cmd = new NpgsqlCommand(@"CREATE TABLE IF NOT EXISTS ""lista"" (Id int, Selite varchar)", conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    using (var cmd = new NpgsqlCommand(@"INSERT INTO ""lista"" (Id, Selite) VALUES (1, 'Ensimmäinen'), (2, 'foobar'), (3, ''), (4, null)", conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    conn.Close();
+                }
+                    
+            }
+
+            [OneTimeTearDown]
+            public void OneTimeTearDown()
+            {
+                using (var conn = new NpgsqlConnection(_connString))
+                {
+                    conn.Open();
+
+                    using (var cmd = new NpgsqlCommand(@"DROP TABLE ""lista""", conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                        conn.Close();
+                    }
+                }
+            }
 
             /// <summary>
             /// Check that returned id values are 1,2,3.
@@ -32,7 +80,7 @@ namespace Frends.Community.Postgre.Tests
 
                 var output = new OutputProperties
                 {
-                    ReturnType = QueryReturnType.Xml,
+                    ReturnType = Enums.QueryReturnType.Xml,
                     XmlOutput = new XmlOutputProperties
                     {
                         RootElementName = "ROW",
@@ -42,14 +90,14 @@ namespace Frends.Community.Postgre.Tests
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
+                var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine("RESULT: " + result.Result);
+                TestContext.Out.WriteLine("RESULT: " + result.Output);
 
 
-                Assert.IsTrue(result.Result.Contains("<id>1</id>"));
-                Assert.IsTrue(result.Result.Contains("<id>2</id>"));
-                Assert.IsTrue(result.Result.Contains("<id>3</id>"));
+                Assert.IsTrue(result.Output.Contains("<id>1</id>"));
+                Assert.IsTrue(result.Output.Contains("<id>2</id>"));
+                Assert.IsTrue(result.Output.Contains("<id>3</id>"));
             }
 
             /// <summary>
@@ -66,7 +114,7 @@ namespace Frends.Community.Postgre.Tests
 
                 var output = new OutputProperties
                 {
-                    ReturnType = QueryReturnType.Xml,
+                    ReturnType = Enums.QueryReturnType.Xml,
                     XmlOutput = new XmlOutputProperties
                     {
                         RootElementName = "Root",
@@ -76,12 +124,12 @@ namespace Frends.Community.Postgre.Tests
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
+                var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine("RESULT: " + result.Result);
+                TestContext.Out.WriteLine("RESULT: " + result.Output);
 
                 var table = new XmlDocument();
-                table.LoadXml(result.Result.ToString());
+                table.LoadXml(result.Output.ToString());
                 var node = table.SelectSingleNode("/Root/Row[1]/id");
                 Assert.IsTrue(node == null);
             }
@@ -104,7 +152,7 @@ namespace Frends.Community.Postgre.Tests
 
                 var output = new OutputProperties
                 {
-                    ReturnType = QueryReturnType.Xml,
+                    ReturnType = Enums.QueryReturnType.Xml,
                     XmlOutput = new XmlOutputProperties
                     {
                         RootElementName = "Root",
@@ -114,10 +162,10 @@ namespace Frends.Community.Postgre.Tests
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
+                var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
                 XmlDocument doc = new XmlDocument();
-                doc.LoadXml(result.Result);
-                TestContext.Out.WriteLine("RESULT: " + result.Result);
+                doc.LoadXml(result.Output);
+                TestContext.Out.WriteLine("RESULT: " + result.Output);
                 var node = doc.SelectSingleNode("/Root/Row[1]/id");
                 Assert.IsTrue(node != null);
                 var value = node.SelectSingleNode("//id");
@@ -142,7 +190,7 @@ namespace Frends.Community.Postgre.Tests
 
                 var output = new OutputProperties
                 {
-                    ReturnType = QueryReturnType.Json,
+                    ReturnType = Enums.QueryReturnType.Json,
                     JsonOutput = new JsonOutputProperties()
                     {
                         CultureInfo = "",
@@ -151,11 +199,11 @@ namespace Frends.Community.Postgre.Tests
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
+                var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine("RESULT: " + result.Result);
+                TestContext.Out.WriteLine("RESULT: " + result.Output);
 
-                Assert.IsTrue(result.Result.Contains("\"id\": 1"));
+                Assert.IsTrue(result.Output.Contains("\"id\": 1"));
             }
 
             [Test]
@@ -173,55 +221,151 @@ namespace Frends.Community.Postgre.Tests
 
                 var output = new OutputProperties
                 {
-                    ReturnType = QueryReturnType.Csv,
+                    ReturnType = Enums.QueryReturnType.Csv,
                     CsvOutput = new CsvOutputProperties()
                     {
                         IncludeHeaders = false,
-                        CsvSeparator = ";"
+                        FieldDelimiter = Enums.CsvFieldDelimiter.Semicolon
                     }
                 };
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                Output result = PostgreOperations.QueryData(input, output, _connection, options, new CancellationToken()).Result;
+                var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
 
                 
-                Assert.IsTrue(result.Result.Contains("1"));
+                Assert.IsTrue(result.Output.Contains("1"));
             }
 
             [Test]
-            public void QueryToFileSingle()
+            public void QueryToFileSingleCsv()
             {
+                var path = "c:/temp/temps.csv";
                 var input = new QueryParameters
                 {
                     Query = "SELECT * FROM lista",
                     Parameters = null
                 };
 
-                var output = new SaveQueryToCsvOptions
+                var output = new SaveQueryToFileProperties
                 {
-                    OutputFilePath = "c:/temp/temps.csv",
-                    Encoding = "utf-8",
-                    FieldDelimiter = CsvFieldDelimiter.Semicolon,
-                    LineBreak = CsvLineBreak.CRLF,
-                    IncludeHeadersInOutput = true,
-                    SanitizeColumnHeaders = true,
-                    AddQuotesToDates = true,
-                    DateFormat = "yyyy-MM-dd",
-                    DateTimeFormat = "yyyy-MM-dd HH:mm:ss"
+                    ReturnType = Enums.QueryReturnType.Csv,
+                    Path = path,
+                    Encoding = Enums.EncodingOptions.UTF8,
+                    EnableBom = false,
+                    CsvOptions = new CsvOutputProperties
+                    {
+                        FieldDelimiter = Enums.CsvFieldDelimiter.Semicolon,
+                        LineBreak = Enums.CsvLineBreak.CRLF,
+                        IncludeHeaders = true,
+                        SanitizeColumnHeaders = true,
+                        AddQuotesToDates = true,
+                        DateFormat = "yyyy-MM-dd",
+                        DateTimeFormat = "yyyy-MM-dd HH:mm:ss"
+                    },
+                    Append = false
                 };
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                Output result = PostgreOperations.QueryToFile(input, output, _connection, options, new CancellationToken()).Result;
+                var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine("RESULT: " + result.Result);
+                TestContext.Out.WriteLine($"RESULT: {result.Path}, {result.Rows}");
 
-                string fileData = File.ReadAllText("c:/temp/temps.csv");
-                Assert.IsTrue(File.Exists("c:/temp/temps.csv"));
+                Assert.IsTrue(File.Exists(path));
+                string fileData = File.ReadAllText(path);
+                TestContext.Out.WriteLine("Content: " + fileData);
+
                 Assert.IsTrue(fileData.Contains("1"));
                 Assert.IsTrue(fileData.Contains("2"));
                 Assert.IsTrue(fileData.Contains("3"));
+
+                File.Delete(path);
+            }
+
+            [Test]
+            public void QueryToFileSingleJson()
+            {
+                var path = "c:/temp/temps.csv";
+                var input = new QueryParameters
+                {
+                    Query = "SELECT * FROM lista",
+                    Parameters = null
+                };
+
+                var output = new SaveQueryToFileProperties
+                {
+                    ReturnType = Enums.QueryReturnType.Json,
+                    Path = path,
+                    Encoding = Enums.EncodingOptions.UTF8,
+                    EnableBom = false,
+                    JsonOptions = new JsonOutputProperties
+                    {
+                        CultureInfo = "fi-FI"
+                    },
+                    Append = false
+                };
+
+                var options = new Options { ThrowErrorOnFailure = true };
+
+                var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
+
+                TestContext.Out.WriteLine($"RESULT: {result.Path}, {result.Rows}");
+
+                Assert.IsTrue(File.Exists(path));
+                var fileData = JToken.Parse(File.ReadAllText(path));
+                TestContext.Out.WriteLine("Content: " + fileData);
+                Assert.AreEqual(1, fileData[0]["id"].Value<int>());
+                Assert.AreEqual("Ensimmäinen", fileData[0]["selite"].Value<string>());
+
+                File.Delete(path);
+            }
+
+            [Test]
+            public void QueryToFileSingleXml()
+            {
+                var path = "c:/temp/temps.xml";
+                var input = new QueryParameters
+                {
+                    Query = "SELECT * FROM lista",
+                    Parameters = null
+                };
+
+                var output = new SaveQueryToFileProperties
+                {
+                    ReturnType = Enums.QueryReturnType.Xml,
+                    Path = path,
+                    Encoding = Enums.EncodingOptions.UTF8,
+                    EnableBom = false,
+                    XmlOptions = new XmlOutputProperties
+                    {
+                        RootElementName = "Root",
+                        RowElementName = "Row"
+                    },
+                    Append = false
+                };
+
+                var options = new Options { ThrowErrorOnFailure = true };
+
+                var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
+
+                TestContext.Out.WriteLine($"RESULT: {result.Path}, {result.Rows}");
+
+                Assert.IsTrue(File.Exists(path));
+                var fileData = File.ReadAllText(path);
+
+                XmlDocument doc = new XmlDocument();
+                TestContext.Out.WriteLine("Content: " + fileData);
+                doc.LoadXml(fileData);
+                
+                var node = doc.SelectSingleNode("/Root/Row[1]/id");
+                Assert.IsTrue(node != null);
+                var value = node.SelectSingleNode("//id");
+                Assert.IsTrue(value != null && value.InnerText == "1");
+                value = node.SelectSingleNode("//selite");
+                Assert.IsTrue(value != null && value.InnerText == "Ensimmäinen");
+
+                File.Delete(path);
             }
         }
     }

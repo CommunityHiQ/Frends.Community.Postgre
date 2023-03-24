@@ -1,11 +1,14 @@
-﻿using Npgsql;
+﻿using Frends.Community.Postgre.Definitions;
+using Npgsql;
 using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member
 
+[assembly: InternalsVisibleTo("Frends.Community.Postgre.Tests")]
 namespace Frends.Community.Postgre
 {
     public class PostgreOperations
@@ -19,70 +22,79 @@ namespace Frends.Community.Postgre
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Object { bool Success, string Message, string Result } </returns>
-        public static async Task<dynamic> QueryData([PropertyTab] QueryParameters queryParameters, [PropertyTab] OutputProperties output, [PropertyTab] ConnectionInformation connectionInfo, [PropertyTab] Options options, CancellationToken cancellationToken)
+        public static async Task<QueryResult> ExecuteQuery([PropertyTab] QueryParameters queryParameters, [PropertyTab] OutputProperties output, [PropertyTab] ConnectionInformation connectionInfo, [PropertyTab] Options options, CancellationToken cancellationToken)
         {
             try
             {
-                
-                using (var conn = new NpgsqlConnection(connectionInfo.ConnectionString))
+                using (var connection = new NpgsqlConnection(connectionInfo.ConnectionString))
                 {
-                    await conn.OpenAsync(cancellationToken);
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    using (var cmd = new NpgsqlCommand())
+                    try
                     {
-                        cmd.Connection = conn;
-                        cmd.CommandTimeout = connectionInfo.TimeoutSeconds;
-                        cmd.CommandText = queryParameters.Query;
+                        await connection.OpenAsync(cancellationToken);
+                        cancellationToken.ThrowIfCancellationRequested();
 
-                        // Add parameters to command, if any were given.
-                        if (queryParameters.Parameters != null)
+                        using (var cmd = new NpgsqlCommand())
                         {
-                            foreach (var parameter in queryParameters.Parameters)
+                            cmd.Connection = connection;
+                            cmd.CommandTimeout = connectionInfo.TimeoutSeconds;
+                            cmd.CommandText = queryParameters.Query;
+
+                            // Add parameters to command, if any were given.
+                            if (queryParameters.Parameters != null)
                             {
-                                var value = parameter.Value;
-                                if (value == null)
-                                    value = DBNull.Value;
-                                cmd.Parameters.AddWithValue(parameter.Name, value);
+                                foreach (var parameter in queryParameters.Parameters)
+                                {
+                                    var value = parameter.Value;
+                                    if (value == null)
+                                        value = DBNull.Value;
+                                    cmd.Parameters.AddWithValue(parameter.Name, value);
+                                }
                             }
+
+                            string queryResult;
+
+                            switch (output.ReturnType)
+                            {
+                                case Enums.QueryReturnType.Xml:
+                                    queryResult = await cmd.ToXmlAsync(output, cancellationToken);
+                                    break;
+                                case Enums.QueryReturnType.Json:
+                                    queryResult = await cmd.ToJsonAsync(output, cancellationToken);
+                                    break;
+                                case Enums.QueryReturnType.Csv:
+                                    queryResult = await cmd.ToCsvAsync(output, cancellationToken);
+                                    break;
+                                default:
+                                    throw new ArgumentException("Task 'Return Type' was invalid! Check task properties.");
+                            }
+
+                            return new QueryResult { Success = true, Output = queryResult };
                         }
-
-                        string queryResult;
-
-                        switch (output.ReturnType)
-                        {
-                            case QueryReturnType.Xml:
-                                queryResult = await cmd.ToXmlAsync(output, cancellationToken);
-                                break;
-                            case QueryReturnType.Json:
-                                queryResult = await cmd.ToJsonAsync(output, cancellationToken);
-                                break;
-                            case QueryReturnType.Csv:
-                                queryResult = await cmd.ToCsvAsync(output, cancellationToken);
-                                break;
-                            default:
-                                throw new ArgumentException("Task 'Return Type' was invalid! Check task properties.");
-                        }
-
-                        return new Output { Success = true, Result = queryResult };
+                    
+                    }
+                    finally
+                    {
+                        // Close connection
+                        connection.Dispose();
+                        connection.Close();
+                        NpgsqlConnection.ClearPool(connection);
                     }
                 }
             }
             catch (Exception ex)
             {
                 if (options.ThrowErrorOnFailure)
-                    throw;
-                return new Output
+                    throw ex;
+                return new QueryResult
                 {
                     Success = false,
                     Message = ex.Message
                 };
             }
-
         }
 
         /// <summary>
-        /// Task for performing queries in Postgre databases and saves result to csv. See documentation at https://github.com/CommunityHiQ/Frends.Community.Postgre
+        /// Query data using PostgreSQL. Documentation: https://github.com/CommunityHiQ/Frends.Community.Postgre
         /// </summary>
         /// <param name="queryParameters"></param>
         /// <param name="output"></param>
@@ -90,22 +102,21 @@ namespace Frends.Community.Postgre
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Object { bool Success, string Message, string Result } </returns>
-        public static async Task<Output> QueryToFile([PropertyTab] QueryParameters queryParameters, [PropertyTab] SaveQueryToCsvOptions output, [PropertyTab] ConnectionInformation connectionInfo, [PropertyTab] Options options, CancellationToken cancellationToken)
+        public static async Task<QueryToFileResult> ExecuteQueryToFile([PropertyTab] QueryParameters queryParameters, [PropertyTab] SaveQueryToFileProperties output, [PropertyTab] ConnectionInformation connectionInfo, [PropertyTab] Options options, CancellationToken cancellationToken)
         {
             try
             {
-                using (var c = new NpgsqlConnection(connectionInfo.ConnectionString))
+                using (var connection = new NpgsqlConnection(connectionInfo.ConnectionString))
                 {
                     try
                     {
-                        await c.OpenAsync(cancellationToken);
+                        await connection.OpenAsync(cancellationToken);
 
-                        using (var command = new NpgsqlCommand(queryParameters.Query, c))
+                        using (var command = new NpgsqlCommand(queryParameters.Query, connection))
                         {
                             command.CommandTimeout = connectionInfo.TimeoutSeconds;
                             command.CommandText = queryParameters.Query;
 
-                            // Add parameters to command, if any were given.
                             if (queryParameters.Parameters != null)
                             {
                                 foreach (var parameter in queryParameters.Parameters)
@@ -114,24 +125,28 @@ namespace Frends.Community.Postgre
                                 }
                             }
 
-                            var result = await command.ToCsvFileAsync(output, cancellationToken);
-                            return new Output { Success = true, Result = result.ToString() };
+                            int rows = 0;
+                            string path = "";
+
+                            (rows, path) = await command.WriteToFileAsync(output, cancellationToken);
+                             
+                            return new QueryToFileResult { Success = true,  Rows = rows, Path = path };
                         }
                     }
                     finally
                     {
                         // Close connection
-                        c.Dispose();
-                        c.Close();
-                        NpgsqlConnection.ClearPool(c);
+                        connection.Dispose();
+                        connection.Close();
+                        NpgsqlConnection.ClearPool(connection);
                     }
                 }
             }
             catch (Exception ex)
             {
                 if (options.ThrowErrorOnFailure)
-                    throw;
-                return new Output
+                    throw ex;
+                return new QueryToFileResult
                 {
                     Success = false,
                     Message = ex.Message

@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Frends.Community.Postgre</name>
+    </assembly>
+    <members>
+        <member name="T:Frends.Community.Postgre.Definitions.ConnectionInformation">
+            <summary>
+            Connection parameters
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.ConnectionInformation.ConnectionString">
+            <summary>
+            Connection string
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.ConnectionInformation.TimeoutSeconds">
+            <summary>
+            Timeout seconds
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.CsvOutputProperties">
+            <summary>
+            Csv output specific properties
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.IncludeHeaders">
+            <summary>
+            Include headers in csv output file?
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.ColumnsToInclude">
+            <summary>
+            Columns to include in the CSV output. Leave empty to include all columns in output.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.FieldDelimiter">
+            <summary>
+            What to use as field separators
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.LineBreak">
+            <summary>
+            What to use as line breaks
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.SanitizeColumnHeaders">
+            <summary>
+            Whether to sanitize headers in output:
+            - Strip any chars that are not 0-9, a-z or _
+            - Make sure that column does not start with a number or underscore
+            - Force lower case
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.AddQuotesToDates">
+            <summary>
+            Whether to add quotes around DATE and DATETIME fields
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.DateFormat">
+            <summary>
+            Date format to use for formatting DATE columns, use .NET formatting tokens.
+            Note that formatting is done using invariant culture.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.CsvOutputProperties.DateTimeFormat">
+            <summary>
+            Date format to use for formatting DATETIME columns, use .NET formatting tokens.
+            Note that formatting is done using invariant culture.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Enums">
+            <summary>
+            Enumerations used in Task parameters.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Enums.QueryReturnType">
+            <summary>
+            Return type
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Enums.CsvFieldDelimiter">
+            <summary>
+            CSV field delimeter options
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Enums.CsvLineBreak">
+            <summary>
+            CSV line break options
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Enums.EncodingOptions">
+            <summary>
+            Encoding options
+            </summary>
+        </member>
+        <member name="F:Frends.Community.Postgre.Definitions.Enums.EncodingOptions.Other">
+            <summary>
+            Other enables users to add other encoding options as string.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.JsonOutputProperties">
+            <summary>
+            Json output specific properties
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.JsonOutputProperties.CultureInfo">
+            <summary>
+            Specify the culture info to be used when parsing result to JSON. If this is left empty InvariantCulture will be used. List of cultures: https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx Use the Language Culture Name.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Options">
+            <summary>
+            Task options.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.Options.ThrowErrorOnFailure">
+            <summary>
+            Choose if error should be thrown if Task failes.
+            Otherwise returns Object {Success = false }
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.OutputProperties">
+            <summary>
+            Output parameters.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.OutputProperties.ReturnType">
+            <summary>
+            Return type of the query.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.OutputProperties.XmlOutput">
+            <summary>
+            Xml specific output properties.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.OutputProperties.JsonOutput">
+            <summary>
+            Json specific output properties.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.OutputProperties.CsvOutput">
+            <summary>
+            Csv specific output properties.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Parameter">
+            <summary>
+            Parameter
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.Parameter.Name">
+            <summary>
+            Field name
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.Parameter.Value">
+            <summary>
+             Field value
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.QueryParameters">
+            <summary>
+            Query Postgre
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.QueryParameters.Query">
+            <summary>
+            Query.
+            Note: Normal query requires double quotes around Column and 2 single quotes around Value.
+            Query with params Example: SELECT * FROM table WHERE \"Column\" = '||:Value||' 
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.QueryParameters.Parameters">
+            <summary>
+            Query parameters
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.QueryResult">
+            <summary>
+            Return object
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.QueryResult.Output">
+            <summary>
+            Content returned from query.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.QueryToFileResult">
+            <summary>
+            Return object
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.QueryToFileResult.Path">
+            <summary>
+            File path.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.QueryToFileResult.Rows">
+            <summary>
+            Rows affected.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.Result">
+            <summary>
+            Return object
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.Result.Success">
+            <summary>
+            Boolean value for successful opration.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.Result.Message">
+            <summary>
+            Possible error message.
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties">
+            <summary>
+            Properties for when user wants to write the result directly into a file
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.ReturnType">
+            <summary>
+            Return type of the query.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.XmlOptions">
+            <summary>
+            Xml specific output properties.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.JsonOptions">
+            <summary>
+            Json specific output properties.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.CsvOptions">
+            <summary>
+            Csv specific output properties.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.Path">
+            <summary>
+            Query output filepath
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.Append">
+            <summary>
+             Enables the task to append to the end of the file. If disabled the file is overwritten.
+             </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.Encoding">
+            <summary>
+            Output file encoding
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.EncodingString">
+            <summary>
+            Manualy give encoding.
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.SaveQueryToFileProperties.EnableBom">
+            <summary>
+            Enable bom on utf-8 encoding
+            </summary>
+        </member>
+        <member name="T:Frends.Community.Postgre.Definitions.XmlOutputProperties">
+            <summary>
+            Xml output specific properties
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.XmlOutputProperties.RootElementName">
+            <summary>
+            Xml root element name
+            </summary>
+        </member>
+        <member name="P:Frends.Community.Postgre.Definitions.XmlOutputProperties.RowElementName">
+            <summary>
+            Xml row element name
+            </summary>
+        </member>
+        <member name="M:Frends.Community.Postgre.Extensions.ToXmlAsync(Npgsql.NpgsqlCommand,Frends.Community.Postgre.Definitions.OutputProperties,System.Threading.CancellationToken)">
+            <summary>
+            Write query results to csv string
+            </summary>
+            <param name="command"></param>
+            <param name="output"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Frends.Community.Postgre.Extensions.ToJsonAsync(Npgsql.NpgsqlCommand,Frends.Community.Postgre.Definitions.OutputProperties,System.Threading.CancellationToken)">
+            <summary>
+            Write query results to json string
+            </summary>
+            <param name="command"></param>
+            <param name="output"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Frends.Community.Postgre.Extensions.ToCsvAsync(Npgsql.NpgsqlCommand,Frends.Community.Postgre.Definitions.OutputProperties,System.Threading.CancellationToken)">
+            <summary>
+            Write query results to csv string
+            </summary>
+            <param name="command"></param>
+            <param name="output"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Frends.Community.Postgre.PostgreOperations.ExecuteQuery(Frends.Community.Postgre.Definitions.QueryParameters,Frends.Community.Postgre.Definitions.OutputProperties,Frends.Community.Postgre.Definitions.ConnectionInformation,Frends.Community.Postgre.Definitions.Options,System.Threading.CancellationToken)">
+            <summary>
+            Query data using PostgreSQL. Documentation: https://github.com/CommunityHiQ/Frends.Community.Postgre
+            </summary>
+            <param name="queryParameters"></param>
+            <param name="output"></param>
+            <param name="connectionInfo"></param>
+            <param name="options"></param>
+            <param name="cancellationToken"></param>
+            <returns>Object { bool Success, string Message, string Result } </returns>
+        </member>
+        <member name="M:Frends.Community.Postgre.PostgreOperations.ExecuteQueryToFile(Frends.Community.Postgre.Definitions.QueryParameters,Frends.Community.Postgre.Definitions.SaveQueryToFileProperties,Frends.Community.Postgre.Definitions.ConnectionInformation,Frends.Community.Postgre.Definitions.Options,System.Threading.CancellationToken)">
+            <summary>
+            Query data using PostgreSQL. Documentation: https://github.com/CommunityHiQ/Frends.Community.Postgre
+            </summary>
+            <param name="queryParameters"></param>
+            <param name="output"></param>
+            <param name="connectionInfo"></param>
+            <param name="options"></param>
+            <param name="cancellationToken"></param>
+            <returns>Object { bool Success, string Message, string Result } </returns>
+        </member>
+    </members>
+</doc>

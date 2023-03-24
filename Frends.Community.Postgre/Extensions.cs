@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Frends.Community.Postgre.Definitions;
+using System;
 using System.Data;
 using Newtonsoft.Json.Linq;
 using System.Xml;
@@ -8,19 +7,16 @@ using System.Text;
 using Npgsql;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using CsvHelper;
-using CsvHelper.Configuration;
 using Newtonsoft.Json;
 
 namespace Frends.Community.Postgre
 {
-    static class Extensions
+    internal static class Extensions
     {
         /// <summary>
-        /// Write query results to csv string or file
+        /// Write query results to csv string
         /// </summary>
         /// <param name="command"></param>
         /// <param name="output"></param>
@@ -28,10 +24,7 @@ namespace Frends.Community.Postgre
         /// <returns></returns>
         public static async Task<string> ToXmlAsync(this NpgsqlCommand command, OutputProperties output, CancellationToken cancellationToken)
         {
-            // utf-8 as default encoding
-            var encoding = string.IsNullOrWhiteSpace(output.OutputFile?.Encoding) ? Encoding.UTF8 : Encoding.GetEncoding(output.OutputFile.Encoding);
-
-            using (var writer = output.OutputToFile ? new StreamWriter(output.OutputFile.Path, false, encoding) : new StringWriter() as TextWriter)
+            using (var writer =  new StringWriter() as TextWriter)
             using (var reader = await command.ExecuteReaderAsync(cancellationToken))
             {
                 using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { Async = true, Indent = true }))
@@ -60,12 +53,12 @@ namespace Frends.Community.Postgre
                     await xmlWriter.WriteEndDocumentAsync();
                 }
 
-                return output.OutputToFile ? output.OutputFile.Path : writer.ToString();
+                return writer.ToString();
             }
         }
 
         /// <summary>
-        /// Write query results to json string or file
+        /// Write query results to json string
         /// </summary>
         /// <param name="command"></param>
         /// <param name="output"></param>
@@ -77,17 +70,12 @@ namespace Frends.Community.Postgre
             {
                 var culture = string.IsNullOrWhiteSpace(output.JsonOutput.CultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(output.JsonOutput.CultureInfo);
 
-                // utf-8 as default encoding
-                var encoding = string.IsNullOrWhiteSpace(output.OutputFile?.Encoding) ? Encoding.UTF8 : Encoding.GetEncoding(output.OutputFile.Encoding);
-
                 // create json result
-                using (var fileWriter = output.OutputToFile ? new StreamWriter(output.OutputFile.Path, false, encoding) : null)
-                using (var writer = output.OutputToFile ? new JsonTextWriter(fileWriter) : new JTokenWriter() as JsonWriter)
+                using (var writer = new JTokenWriter() as JsonWriter)
                 {
                     writer.Formatting = Newtonsoft.Json.Formatting.Indented;
                     writer.Culture = culture;
                     
-
                     // start array
                     await writer.WriteStartArrayAsync(cancellationToken);
 
@@ -107,7 +95,7 @@ namespace Frends.Community.Postgre
                             cancellationToken.ThrowIfCancellationRequested();
                         }
 
-                        await writer.WriteEndObjectAsync(cancellationToken); // end row object
+                        await writer.WriteEndObjectAsync(cancellationToken);
 
                         cancellationToken.ThrowIfCancellationRequested();
                     }
@@ -115,13 +103,13 @@ namespace Frends.Community.Postgre
                     // end array
                     await writer.WriteEndArrayAsync(cancellationToken);
 
-                    return output.OutputToFile ? output.OutputFile.Path : ((JTokenWriter)writer).Token.ToString();
+                    return ((JTokenWriter)writer).Token.ToString();
                 }
             }
         }
 
         /// <summary>
-        /// Write query results to csv string or file
+        /// Write query results to csv string
         /// </summary>
         /// <param name="command"></param>
         /// <param name="output"></param>
@@ -129,10 +117,8 @@ namespace Frends.Community.Postgre
         /// <returns></returns>
         public static async Task<string> ToCsvAsync(this NpgsqlCommand command, OutputProperties output, CancellationToken cancellationToken)
         {
-            // utf-8 as default encoding
-            var encoding = string.IsNullOrWhiteSpace(output.OutputFile?.Encoding) ? Encoding.UTF8 : Encoding.GetEncoding(output.OutputFile.Encoding);
             using (var reader = await command.ExecuteReaderAsync(cancellationToken))
-            using (var w = output.OutputToFile ? new StreamWriter(output.OutputFile.Path, false, encoding) : new StringWriter() as TextWriter)
+            using (var writer =  new StringWriter() as TextWriter)
             {
                 bool headerWritten = false;
 
@@ -146,7 +132,7 @@ namespace Frends.Community.Postgre
                         {
                             fieldNames[i] = reader.GetName(i);
                         }
-                        await w.WriteLineAsync(string.Join(output.CsvOutput.CsvSeparator, fieldNames));
+                        await writer.WriteLineAsync(string.Join(output.CsvOutput.GetFieldDelimiterAsString(), fieldNames));
                         headerWritten = true;
                     }
 
@@ -155,157 +141,56 @@ namespace Frends.Community.Postgre
                     {
                         fieldValues[i] = reader.GetValue(i);
                     }
-                    await w.WriteLineAsync(string.Join(output.CsvOutput.CsvSeparator, fieldValues));
+                    await writer.WriteLineAsync(string.Join(output.CsvOutput.GetFieldDelimiterAsString(), fieldValues));
 
                     // write only complete rows, but stop if process was terminated
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                return output.OutputToFile ? output.OutputFile.Path : w.ToString();
+                return writer.ToString();
             }
         }
-        #region QueryToFileTask
 
-        internal static async Task<int> ToCsvFileAsync(this NpgsqlCommand command, SaveQueryToCsvOptions output, CancellationToken cancellationToken)
+        public static async Task<Tuple<int, string>> WriteToFileAsync(this NpgsqlCommand command, SaveQueryToFileProperties output, CancellationToken cancellationToken)
         {
-            int result;
             command.CommandType = CommandType.Text;
-            var encoding = string.IsNullOrWhiteSpace(output?.Encoding) ? Encoding.UTF8 : Encoding.GetEncoding(output.Encoding);
+            var encoding = GetEncoding(output.Encoding, output.EncodingString, output.EnableBom);
             using (var reader = await command.ExecuteReaderAsync(cancellationToken) as NpgsqlDataReader)
-            using (var writer = new StreamWriter(output.OutputFilePath, false, encoding))
-            using (var csvFile = CreateCsvWriter(output.GetFieldDelimiterAsString(), writer))
             {
-                writer.NewLine = output.GetLineBreakAsString();
-                result = DataReaderToCsv(reader, csvFile, output, cancellationToken);
-
-                csvFile.Flush();
-            }
-            return result;
-        }
-
-        internal static CsvWriter CreateCsvWriter(string delimiter, TextWriter writer)
-        {
-            var csvOptions = new Configuration
-            {
-                Delimiter = delimiter,
-            };
-            return new CsvWriter(writer, csvOptions);
-        }
-
-        internal static string FormatDbHeader(string header, bool forceSpecialFormatting)
-        {
-            if (!forceSpecialFormatting) return header;
-
-            // First part of regex removes all non-alphanumeric ('_' also allowed) chars from the whole string
-            // Second part removed any leading numbers or underscores
-            Regex rgx = new Regex("[^a-zA-Z0-9_-]|^[0-9_]+");
-            header = rgx.Replace(header, "");
-            return header.ToLower();
-        }
-
-        internal static string FormatDbValue(object value, string dbTypeName, Type dbType, SaveQueryToCsvOptions options)
-        {
-            if (value == null || value == DBNull.Value)
-            {
-                if (dbType == typeof(string)) return "\"\"";
-                if (dbType == typeof(DateTime) && options.AddQuotesToDates) return "\"\"";
-                return "";
-            }
-
-            if (dbType == typeof(string))
-            {
-                var str = (string)value;
-                str = str.Replace("\"", "\\\"");
-                str = str.Replace("\r\n", " ");
-                str = str.Replace("\r", " ");
-                str = str.Replace("\n", " ");
-                return $"\"{str}\"";
-            }
-
-            if (dbType == typeof(DateTime))
-            {
-                var dateTime = (DateTime)value;
-                string output;
-                switch (dbTypeName?.ToLower())
+                switch (output.ReturnType)
                 {
-                    case "date":
-                        output = dateTime.ToString(options.DateFormat, CultureInfo.InvariantCulture);
+                    case Enums.QueryReturnType.Csv:
+                        CsvFileWriter.ToCsvFile(reader, output, encoding, cancellationToken);
                         break;
-                    default:
-                        output = dateTime.ToString(options.DateTimeFormat, CultureInfo.InvariantCulture);
+                    case Enums.QueryReturnType.Xml:
+                        await XmlFileWriter.ToXmlFile(reader, output, encoding, cancellationToken);
+                        break;
+                    case Enums.QueryReturnType.Json:
+                        await JsonFileWriter.ToJsonFileAsync(reader, output, encoding, cancellationToken);
                         break;
                 }
-
-                if (options.AddQuotesToDates) return $"\"{output}\"";
-                return output;
+                return new Tuple<int, string>(reader.RecordsAffected, output.Path);
             }
-
-            if (dbType == typeof(float))
-            {
-                var floatValue = (float)value;
-                return floatValue.ToString("0.###########", CultureInfo.InvariantCulture);
-            }
-
-            if (dbType == typeof(double))
-            {
-                var doubleValue = (double)value;
-                return doubleValue.ToString("0.###########", CultureInfo.InvariantCulture);
-            }
-
-            if (dbType == typeof(decimal))
-            {
-                var decimalValue = (decimal)value;
-                return decimalValue.ToString("0.###########", CultureInfo.InvariantCulture);
-            }
-
-            return value.ToString();
         }
 
-        internal static int DataReaderToCsv(NpgsqlDataReader reader, CsvWriter csvWriter, SaveQueryToCsvOptions options, CancellationToken cancellationToken)
+        internal static Encoding GetEncoding(Enums.EncodingOptions encoding, string encodingString, bool enableBom)
         {
-            // Write header and remember column indexes to include
-            var columnIndexesToInclude = new List<int>();
-            for (var i = 0; i < reader.FieldCount; i++)
+            switch (encoding)
             {
-                var columnName = reader.GetName(i);
-                var includeColumn =
-                    options.ColumnsToInclude == null ||
-                    options.ColumnsToInclude.Length == 0 ||
-                    ((IList)options.ColumnsToInclude).Contains(columnName);
-
-                if (includeColumn)
-                {
-                    if (options.IncludeHeadersInOutput)
-                    {
-                        var formattedHeader = FormatDbHeader(columnName, options.SanitizeColumnHeaders);
-                        csvWriter.WriteField(formattedHeader);
-                    }
-                    columnIndexesToInclude.Add(i);
-                }
+                case Enums.EncodingOptions.UTF8:
+                    return enableBom ? new UTF8Encoding(true) : new UTF8Encoding(false);
+                case Enums.EncodingOptions.ASCII:
+                    return new ASCIIEncoding();
+                case Enums.EncodingOptions.ANSI:
+                    return Encoding.Default;
+                case Enums.EncodingOptions.WINDOWS1252:
+                    return CodePagesEncodingProvider.Instance.GetEncoding("windows-1252");
+                case Enums.EncodingOptions.Other:
+                    return CodePagesEncodingProvider.Instance.GetEncoding(encodingString);
+                default:
+                    throw new ArgumentOutOfRangeException($"Unknown Encoding type: '{encoding}'.");
             }
-
-            if (options.IncludeHeadersInOutput) csvWriter.NextRecord();
-
-            var count = 0;
-            while (reader.Read())
-            {
-                foreach (var columnIndex in columnIndexesToInclude)
-                {
-                    var dbType = reader.GetFieldType(columnIndex);
-                    var dbTypeName = reader.GetDataTypeName(columnIndex);
-                    var value = reader.GetValue(columnIndex);
-                    var formattedValue = FormatDbValue(value, dbTypeName, dbType, options);
-
-                    csvWriter.WriteField(formattedValue, false);
-                }
-                csvWriter.NextRecord();
-                count++;
-            }
-
-            return count;
         }
-
-        #endregion
     }
 }
 

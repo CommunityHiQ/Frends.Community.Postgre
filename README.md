@@ -1,12 +1,12 @@
 - [Frends.Community.Files.Postgre](#frendscommunitypostgre)
    - [Installing](#installing)
    - [Tasks](#tasks)
-      - [QueryData](#querydata)
+      - [ExecuteQuery](#executequerydata)
          - [QueryParameters](#queryparameters)
          - [ConnectionInformation](#connectioninformation)
          - [Output](#output)
 		 - [Result](#result)
-	  - [QueryToFile](#querytofile)
+	  - [ExecuteQueryToFile](#executequerytofile)
    - [License](#license)
    - [Building](#building)
    - [Contributing](#contributing)
@@ -20,7 +20,7 @@ https://www.myget.org/F/frends/api/v3/index.json
 
 ## Tasks
 
-### QueryData
+### ExecuteQuery
 
 #### QueryParameters
 
@@ -28,6 +28,42 @@ https://www.myget.org/F/frends/api/v3/index.json
 |-------------------|---------|-----------------------------------------|-----------------------------|
 | Query				| string	| Postgre query string	| ´SELECT * FROM table WHERE \"Column\" = ''Value''´ |
 | Parameters		| Array(string,string)	| List of inputs parameters	| `input` `message` |
+
+#### Query Parameter
+
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Name | string | Parameter name used in Query property | `username` |
+| Value | string | Parameter value | `myUser` |
+
+#### Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Return type | enum<Json, Xml, Csv> | Data return type format | `Json` |
+
+##### OutputProperties
+
+###### Xml Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| RootElementName | string | Xml root element name | `items` |
+| RowElementName |string | Xml row element name | `item` |
+
+###### Json Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Culture info | string | Specify the culture info to be used when parsing result to JSON. If this is left empty InvariantCulture will be used. [List of cultures](https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx) Use the Language Culture Name. | `fi-FI` |
+
+###### Csv Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| IncludeHeaders | bool | Include field names in the first row | `true` |
+| FieldDelimiter | enum<Comma, Semicolon, Pipe> | Csv separator to use in headers and data items. | Enums.CsvFieldDelimiter.Comma |
+| LineBreak | enum<CRLF, LF, CR> | What to use in line breaks. | Enums.CsvLineBreak.CRLF |
+| SanitizeColumnHeaders | bool | Whether to sanitize headers in output. | false |
+| AddQuotesToDates | bool | Whether to add quotes around DATE and DATETIME fields. | false |
+| DateFormat | string | Date format to use for formatting DATE columns, use .NET formatting tokens. | ´yyyy-MM-dd´ |
+| DateTimeFormat | string | Date format to use for formatting DATETIME columns, use .NET formatting tokens. | ´yyyy-MM-dd HH:mm:ss´ |
 
 #### ConnectionInformation
 
@@ -42,47 +78,17 @@ https://www.myget.org/F/frends/api/v3/index.json
 | ------------| -----------| --------------- | ------- |
 | Throw error on failure | bool | Specify if Exception should be thrown when error occurs. If set to *false*, task outcome can be checked from #result.Success property. | `false` |
 
-
-#### Output
-| Property    | Type       | Description     | Example |
-| ------------| -----------| --------------- | ------- |
-| Return type | enum<Json, Xml, Csv> | Data return type format | `Json` |
-| OutputToFile | bool | true to write results to a file, false to return results to executin process | `true` |
-
-##### Xml Output
-| Property    | Type       | Description     | Example |
-| ------------| -----------| --------------- | ------- |
-| RootElementName | string | Xml root element name | `items` |
-| RowElementName |string | Xml row element name | `item` |
-
-##### Json Output
-| Property    | Type       | Description     | Example |
-| ------------| -----------| --------------- | ------- |
-| Culture info | string | Specify the culture info to be used when parsing result to JSON. If this is left empty InvariantCulture will be used. [List of cultures](https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx) Use the Language Culture Name. | `fi-FI` |
-
-##### Csv Output
-| Property    | Type       | Description     | Example |
-| ------------| -----------| --------------- | ------- |
-| IncludeHeaders | bool | Include field names in the first row | `true` |
-| CsvSeparator | string | Csv separator to use in headers and data items | `;` |
-
-##### Output File
-| Property    | Type       | Description     | Example |
-| ------------| -----------| --------------- | ------- |
-| Path | string | Output path with file name | `c:\temp\output.json` |
-| Encoding | string | Encoding to use for the output file | `utf-8` |
-
 #### Result
 
 | Property          |  Type   | Description								| Example                     |
 |-------------------|---------|-----------------------------------------|-----------------------------|
-| Result        | string   | Depends on the value chosen in Input	| XMLString |
+| Output         | string   | Depends on the value chosen in Input	| XMLString |
+| Success        | bool     | Result if the task succeeded	| true |
 | Message        | string   | Error message if Throw error on failure is set to 'False'	| XString |
-| Success        | bool   | Result if the task succeeded	| true |
 
-### QueryToFile
+### ExecuteQueryToFile
 
-Executes query against Postgre database and outputs result to csv. Idea for this is to enable formatting for different data after retreiving it from database. Mainly for datetimes and timestamps in mind.
+Executes query against Postgre database and outputs result to a file. Idea for this is to enable formatting for different data after retreiving it from database. Mainly for datetimes and timestamps in mind.
 
 #### Query Properties
 | Property    | Type       | Description     | Example |
@@ -90,26 +96,15 @@ Executes query against Postgre database and outputs result to csv. Idea for this
 | Query | string | The query to execute | `SELECT * FROM Table WHERE field = :paramName`|
 | Parameters | array[Query Parameter] | Possible query parameters. See [Query Parameter](#query-parameter) |  |
 
-#### Query Parameter
-
-| Property    | Type       | Description     | Example |
-| ------------| -----------| --------------- | ------- |
-| Name | string | Parameter name used in Query property | `username` |
-| Value | string | Parameter value | `myUser` |
-| Data type | enum<> | Parameter data type | `NVarchar2` |
-
 #### Output
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | OutputFilePath | string | Output path with file name | `c:\temp\output.json` |
-| ColumnsToInclude | string[] | Columns to include in the output CSV. If no columns defined here then all columns will be written to output CSV. | `[id, name, value]` |
-| FieldDelimiter | enum { Comma, Semicolon, Pipe } | Field delimeter to use in output CSV | Comma |
-| LineBreak | enum { CR, LF, CRLF } | Line break style to use in output CSV. | CRLF |
-| IncludeHeadersInOutput | bool | Wherther to include headers in output CSV. | `true` |
-| SanitizeColumnHeaders | bool | Whether to sanitize headers in output: (1) Strip any chars that are not 0-9, a-z or _ (2) Make sure that column does not start with a number or underscore (3) Force lower case | `true` |
-| AddQuotesToDates | bool | Whether to add quotes around DATE and DATETIME fields | `true` |
-| DateFormat | string | Date format to use for formatting DATE columns, use .NET formatting tokens. Note that formatting is done using invariant culture. | `yyyy-MM-dd` |
-| DateTimeFormat | string | Date format to use for formatting DATETIME columns, use .NET formatting tokens. Note that formatting is done using invariant culture. | `yyyy-MM-dd HH:mm:ss` |
+| Return type | enum<Json, Xml, Csv> | Data return type format | `Json` See [Output Properties](#outputproperties) |
+| Append | bool | Enables the task to append to the end of the file. | false |
+| Encoding | enum<UTF8, ANSI, ASCII, WINDOWS1252, Other> | Output file encoding | Enums.EncodingOptions |
+| EnableBom | bool | Enable bom on utf-8 encoding | false |
+| EncodingString | string | Manualy give encoding | ´utf-8´ |
 
 #### Connection
 
@@ -128,6 +123,13 @@ Executes query against Postgre database and outputs result to csv. Idea for this
 Newlines in text fields are replaced with spaces.
 
 #### Result
+
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Path | string | Path to the output file | ´c:\temp\temp.csv´ |
+| Rows | int | RowAffected on select default value is always -1 if rows were fetched. | -1 |
+| Success        | bool     | Result if the task succeeded	| true |
+| Message        | string   | Error message if Throw error on failure is set to 'False'	| XString |
 
 ## License
 
@@ -172,4 +174,4 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 1.1.0 | Updated documentation and fixed nuget dependencies. First pubic release. |
 | 1.2.0 | Fixed nuget dependencies again. |
 | 1.3.0 | Added csv return type and option to write result to file. |
-| 1.4.0 | Updated to include the linux agent and few required fixes to write results to file |
+| 2.0.0 | Refactored the task and added new task ExecuteQueryToFile which handles all three datatypes. |

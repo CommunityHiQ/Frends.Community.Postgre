@@ -1,0 +1,16 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "35c305c0-8108-4a98-bb1d-afe5c926239e": {
+      "ProjectGuid": "35c305c0-8108-4a98-bb1d-afe5c926239e",
+      "DisplayName": "Custom.Community.Postgre",
+      "ColorIndex": 0
+    },
+    "8ca92187-8e4f-4414-803b-ec899479022e": {
+      "ProjectGuid": "8ca92187-8e4f-4414-803b-ec899479022e",
+      "DisplayName": "Custom.Community.Postgre.Tests",
+      "ColorIndex": 1
+    }
+  },
+  "NextColorIndex": 2
+}
