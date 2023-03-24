@@ -2,6 +2,7 @@ using Frends.Community.Postgre.Definitions;
 using Npgsql;
 using NUnit.Framework;
 using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
 using System.Threading;
 using System.Xml;
@@ -24,6 +25,8 @@ namespace Frends.Community.Postgre.Tests
             private readonly string _connString = "Host=localhost;Database=postgres;Port=5432;User Id=postgres;Password=mysecretpassword;";
 
             private static ConnectionInformation _connection;
+
+            private readonly string _baseDir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/"));
 
             [OneTimeSetUp]
             public void TestSetup()
@@ -48,7 +51,8 @@ namespace Frends.Community.Postgre.Tests
                     }
                     conn.Close();
                 }
-                    
+                
+                Directory.CreateDirectory(_baseDir);
             }
 
             [OneTimeTearDown]
@@ -64,6 +68,8 @@ namespace Frends.Community.Postgre.Tests
                         conn.Close();
                     }
                 }
+
+                Directory.Delete(_baseDir, true);
             }
 
             /// <summary>
@@ -240,7 +246,7 @@ namespace Frends.Community.Postgre.Tests
             [Test]
             public void QueryToFileSingleCsv()
             {
-                var path = "c:/temp/temps.csv";
+                var path = Path.Combine(_baseDir, "temps.csv");
                 var input = new QueryParameters
                 {
                     Query = "SELECT * FROM lista",
@@ -286,7 +292,7 @@ namespace Frends.Community.Postgre.Tests
             [Test]
             public void QueryToFileSingleJson()
             {
-                var path = "c:/temp/temps.csv";
+                var path = Path.Combine(_baseDir, "temps.json");
                 var input = new QueryParameters
                 {
                     Query = "SELECT * FROM lista",
@@ -324,7 +330,7 @@ namespace Frends.Community.Postgre.Tests
             [Test]
             public void QueryToFileSingleXml()
             {
-                var path = "c:/temp/temps.xml";
+                var path = Path.Combine(_baseDir, "temps.xml");
                 var input = new QueryParameters
                 {
                     Query = "SELECT * FROM lista",
