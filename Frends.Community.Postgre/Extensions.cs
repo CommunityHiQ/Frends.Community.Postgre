@@ -16,7 +16,7 @@ namespace Frends.Community.Postgre
     internal static class Extensions
     {
         /// <summary>
-        /// Write query results to csv string
+        /// Write query results to csv string.
         /// </summary>
         /// <param name="command"></param>
         /// <param name="output"></param>
