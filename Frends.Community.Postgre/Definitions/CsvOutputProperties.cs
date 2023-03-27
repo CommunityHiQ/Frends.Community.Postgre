@@ -40,10 +40,16 @@ namespace Frends.Community.Postgre.Definitions
         public bool SanitizeColumnHeaders { get; set; } = true;
 
         /// <summary>
-        /// Whether to add quotes around DATE and DATETIME fields
+        /// Whether to add quotes around DATE and DATETIME fields.
         /// </summary>
         [DefaultValue(true)]
         public bool AddQuotesToDates { get; set; } = true;
+
+        /// <summary>
+        /// Whether to remove quotation marks from column values.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool RemoveQuotesFromColumns { get; set; } = true;
 
         /// <summary>
         /// Date format to use for formatting DATE columns, use .NET formatting tokens.

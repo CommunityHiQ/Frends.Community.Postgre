@@ -86,8 +86,8 @@ namespace Frends.Community.Postgre.Definitions
         {
             if (value == null || value == DBNull.Value)
             {
-                if (dbType == typeof(string)) return "\"\"";
-                if (dbType == typeof(DateTime) && options.AddQuotesToDates) return "\"\"";
+                if (dbType == typeof(string) || (dbType == typeof(DateTime) && options.AddQuotesToDates)) return "\"\"";
+                if (options.RemoveQuotesFromColumns) return string.Empty;
                 return "";
             }
 
@@ -98,6 +98,7 @@ namespace Frends.Community.Postgre.Definitions
                 str = str.Replace("\r\n", " ");
                 str = str.Replace("\r", " ");
                 str = str.Replace("\n", " ");
+                if (options.RemoveQuotesFromColumns) return str;
                 return $"\"{str}\"";
             }
 
