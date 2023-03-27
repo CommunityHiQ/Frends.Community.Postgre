@@ -21,8 +21,6 @@ namespace Frends.Community.Postgre.Definitions
 
                 await writer.WriteStartArrayAsync(cancellationToken);
 
-                cancellationToken.ThrowIfCancellationRequested();
-
                 while (await reader.ReadAsync())
                 {
                     // start row object
@@ -38,8 +36,6 @@ namespace Frends.Community.Postgre.Definitions
                     }
 
                     await writer.WriteEndObjectAsync(cancellationToken); // end row object
-
-                    cancellationToken.ThrowIfCancellationRequested();
                 }
 
                 // end array

@@ -137,7 +137,7 @@ namespace Frends.Community.Postgre.Tests
                 var table = new XmlDocument();
                 table.LoadXml(result.Output.ToString());
                 var node = table.SelectSingleNode("/Root/Row[1]/id");
-                Assert.IsTrue(node == null);
+                Assert.IsNull(node);
             }
 
             /// <summary>
@@ -173,9 +173,10 @@ namespace Frends.Community.Postgre.Tests
                 doc.LoadXml(result.Output);
                 TestContext.Out.WriteLine("RESULT: " + result.Output);
                 var node = doc.SelectSingleNode("/Root/Row[1]/id");
-                Assert.IsTrue(node != null);
+                Assert.IsNotNull(node);
                 var value = node.SelectSingleNode("//id");
-                Assert.IsTrue(value != null && value.InnerText == "1");
+                Assert.IsNotNull(value);
+                Assert.AreEqual("1", value.InnerText);
             }
 
             /// <summary>
@@ -365,11 +366,13 @@ namespace Frends.Community.Postgre.Tests
                 doc.LoadXml(fileData);
                 
                 var node = doc.SelectSingleNode("/Root/Row[1]/id");
-                Assert.IsTrue(node != null);
+                Assert.IsNotNull(node);
                 var value = node.SelectSingleNode("//id");
-                Assert.IsTrue(value != null && value.InnerText == "1");
+                Assert.IsNotNull(value);
+                Assert.AreEqual("1", value.InnerText);
                 value = node.SelectSingleNode("//selite");
-                Assert.IsTrue(value != null && value.InnerText == "Ensimmäinen");
+                Assert.IsNotNull(value);
+                Assert.AreEqual("Ensimmäinen", value.InnerText);
 
                 File.Delete(path);
             }

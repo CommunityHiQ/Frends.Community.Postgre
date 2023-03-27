@@ -31,7 +31,6 @@ namespace Frends.Community.Postgre
                     try
                     {
                         await connection.OpenAsync(cancellationToken);
-                        cancellationToken.ThrowIfCancellationRequested();
 
                         using (var cmd = new NpgsqlCommand())
                         {

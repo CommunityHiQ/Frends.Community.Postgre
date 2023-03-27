@@ -79,8 +79,6 @@ namespace Frends.Community.Postgre
                     // start array
                     await writer.WriteStartArrayAsync(cancellationToken);
 
-                    cancellationToken.ThrowIfCancellationRequested();
-
                     while (reader.Read())
                     {
                         // start row object
@@ -96,8 +94,6 @@ namespace Frends.Community.Postgre
                         }
 
                         await writer.WriteEndObjectAsync(cancellationToken);
-
-                        cancellationToken.ThrowIfCancellationRequested();
                     }
 
                     // end array
