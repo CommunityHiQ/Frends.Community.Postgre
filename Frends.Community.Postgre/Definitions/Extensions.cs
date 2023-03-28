@@ -1,5 +1,8 @@
-using Frends.Community.Postgre.Definitions;
+using CsvHelper;
+using CsvHelper.Configuration;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using Newtonsoft.Json.Linq;
 using System.Xml;
@@ -9,9 +12,10 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
-namespace Frends.Community.Postgre
+namespace Frends.Community.Postgre.Definitions
 {
     internal static class Extensions
     {
@@ -30,12 +34,12 @@ namespace Frends.Community.Postgre
                 using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { Async = true, Indent = true }))
                 {
                     await xmlWriter.WriteStartDocumentAsync();
-                    await xmlWriter.WriteStartElementAsync("", output.XmlOutput.RootElementName, "");
+                    await xmlWriter.WriteStartElementAsync("", output.XmlOptions.RootElementName, "");
 
                     while (await reader.ReadAsync(cancellationToken))
                     {
                         // single row element container
-                        await xmlWriter.WriteStartElementAsync("", output.XmlOutput.RowElementName, "");
+                        await xmlWriter.WriteStartElementAsync("", output.XmlOptions.RowElementName, "");
 
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
@@ -68,7 +72,7 @@ namespace Frends.Community.Postgre
         {
             using (var reader = await command.ExecuteReaderAsync(cancellationToken))
             {
-                var culture = string.IsNullOrWhiteSpace(output.JsonOutput.CultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(output.JsonOutput.CultureInfo);
+                var culture = string.IsNullOrWhiteSpace(output.JsonOptions.CultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(output.JsonOptions.CultureInfo);
 
                 // create json result
                 using (var writer = new JTokenWriter() as JsonWriter)
@@ -116,33 +120,7 @@ namespace Frends.Community.Postgre
             using (var reader = await command.ExecuteReaderAsync(cancellationToken))
             using (var writer =  new StringWriter() as TextWriter)
             {
-                bool headerWritten = false;
-
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    // write csv header if necessary
-                    if (!headerWritten && output.CsvOutput.IncludeHeaders)
-                    {
-                        var fieldNames = new object[reader.FieldCount];
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            fieldNames[i] = reader.GetName(i);
-                        }
-                        await writer.WriteLineAsync(string.Join(output.CsvOutput.GetFieldDelimiterAsString(), fieldNames));
-                        headerWritten = true;
-                    }
-
-                    var fieldValues = new object[reader.FieldCount];
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        fieldValues[i] = reader.GetValue(i);
-                    }
-                    await writer.WriteLineAsync(string.Join(output.CsvOutput.GetFieldDelimiterAsString(), fieldValues));
-
-                    // write only complete rows, but stop if process was terminated
-                    cancellationToken.ThrowIfCancellationRequested();
-                }
-
+                await DataReaderToCsvString(reader, writer, output.CsvOptions, cancellationToken);
                 return writer.ToString();
             }
         }
@@ -186,6 +164,117 @@ namespace Frends.Community.Postgre
                 default:
                     throw new ArgumentOutOfRangeException($"Unknown Encoding type: '{encoding}'.");
             }
+        }
+
+        internal static async Task DataReaderToCsvString(NpgsqlDataReader reader, TextWriter writer, CsvOutputProperties options, CancellationToken cancellationToken)
+        {
+            // Write header and remember column indexes to include
+            var columnIndexesToInclude = new List<int>();
+            var fieldNames = new object[reader.FieldCount];
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                var columnName = reader.GetName(i);
+                var includeColumn =
+                    options.ColumnsToInclude == null ||
+                    options.ColumnsToInclude.Length == 0 ||
+                    ((IList)options.ColumnsToInclude).Contains(columnName);
+
+                if (includeColumn)
+                {
+                    if (options.IncludeHeaders)
+                    {
+                        var formattedHeader = FormatDbHeader(columnName, options.SanitizeColumnHeaders);
+                        fieldNames[i] = formattedHeader;
+                    }
+                    columnIndexesToInclude.Add(i);
+                }
+            }
+
+            await writer.WriteLineAsync(string.Join(options.GetFieldDelimiterAsString(), fieldNames));
+
+            var fieldValues = new List<object>();
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                foreach (var columnIndex in columnIndexesToInclude)
+                {
+                    var dbType = reader.GetFieldType(columnIndex);
+                    var dbTypeName = reader.GetDataTypeName(columnIndex);
+                    var value = reader.GetValue(columnIndex);
+                    var formattedValue = FormatDbValue(value, dbTypeName, dbType, options);
+                    fieldValues.Add(formattedValue);
+                }
+            }
+            await writer.WriteLineAsync(string.Join(options.GetFieldDelimiterAsString(), fieldValues));
+        }
+
+        internal static string FormatDbHeader(string header, bool forceSpecialFormatting)
+        {
+            if (!forceSpecialFormatting) return header;
+
+            // First part of regex removes all non-alphanumeric ('_' also allowed) chars from the whole string
+            // Second part removed any leading numbers or underscores
+            Regex rgx = new Regex("[^a-zA-Z0-9_-]|^[0-9_]+");
+            header = rgx.Replace(header, "");
+            return header.ToLower();
+        }
+
+        internal static string FormatDbValue(object value, string dbTypeName, Type dbType, CsvOutputProperties options)
+        {
+            if (value == null || value == DBNull.Value)
+            {
+                if (options.RemoveQuotesFromColumns) return string.Empty;
+                if (dbType == typeof(string) || (dbType == typeof(DateTime) && options.AddQuotesToDates)) return "\"\"";
+                return "";
+            }
+
+            if (dbType == typeof(string))
+            {
+                var str = (string)value;
+                str = str.Replace("\"", "\\\"");
+                str = str.Replace("\r\n", " ");
+                str = str.Replace("\r", " ");
+                str = str.Replace("\n", " ");
+                if (options.RemoveQuotesFromColumns) return str;
+                return $"\"{str}\"";
+            }
+
+            if (dbType == typeof(DateTime))
+            {
+                var dateTime = (DateTime)value;
+                string output;
+                switch (dbTypeName?.ToLower())
+                {
+                    case "date":
+                        output = dateTime.ToString(options.DateFormat, CultureInfo.InvariantCulture);
+                        break;
+                    default:
+                        output = dateTime.ToString(options.DateTimeFormat, CultureInfo.InvariantCulture);
+                        break;
+                }
+
+                if (options.AddQuotesToDates) return $"\"{output}\"";
+                return output;
+            }
+
+            if (dbType == typeof(float))
+            {
+                var floatValue = (float)value;
+                return floatValue.ToString("0.###########", CultureInfo.InvariantCulture);
+            }
+
+            if (dbType == typeof(double))
+            {
+                var doubleValue = (double)value;
+                return doubleValue.ToString("0.###########", CultureInfo.InvariantCulture);
+            }
+
+            if (dbType == typeof(decimal))
+            {
+                var decimalValue = (decimal)value;
+                return decimalValue.ToString("0.###########", CultureInfo.InvariantCulture);
+            }
+
+            return value.ToString();
         }
     }
 }

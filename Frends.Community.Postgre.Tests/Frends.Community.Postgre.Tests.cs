@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Globalization;
 using System.Threading;
 using System.Xml;
 
@@ -41,11 +42,12 @@ namespace Frends.Community.Postgre.Tests
                 {
                     conn.Open();
 
-                    using (var cmd = new NpgsqlCommand(@"CREATE TABLE IF NOT EXISTS ""lista"" (Id int, Selite varchar)", conn))
+                    using (var cmd = new NpgsqlCommand(@"CREATE TABLE IF NOT EXISTS ""lista"" (Id int, Selite varchar, Aika timestamp)", conn))
                     {
                         cmd.ExecuteNonQuery();
                     }
-                    using (var cmd = new NpgsqlCommand(@"INSERT INTO ""lista"" (Id, Selite) VALUES (1, 'Ensimmäinen'), (2, 'foobar'), (3, ''), (4, null)", conn))
+                    var date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    using (var cmd = new NpgsqlCommand($@"INSERT INTO ""lista"" (Id, Selite, Aika) VALUES (1, 'Ensimmäinen', '{date}'), (2, 'foobar', '{date}'), (3, '', '{date}'), (4, null, null)", conn))
                     {
                         cmd.ExecuteNonQuery();
                     }
@@ -87,7 +89,7 @@ namespace Frends.Community.Postgre.Tests
                 var output = new OutputProperties
                 {
                     ReturnType = Enums.QueryReturnType.Xml,
-                    XmlOutput = new XmlOutputProperties
+                    XmlOptions = new XmlOutputProperties
                     {
                         RootElementName = "ROW",
                         RowElementName = "ROWSET",
@@ -121,7 +123,7 @@ namespace Frends.Community.Postgre.Tests
                 var output = new OutputProperties
                 {
                     ReturnType = Enums.QueryReturnType.Xml,
-                    XmlOutput = new XmlOutputProperties
+                    XmlOptions = new XmlOutputProperties
                     {
                         RootElementName = "Root",
                         RowElementName = "Row",
@@ -159,7 +161,7 @@ namespace Frends.Community.Postgre.Tests
                 var output = new OutputProperties
                 {
                     ReturnType = Enums.QueryReturnType.Xml,
-                    XmlOutput = new XmlOutputProperties
+                    XmlOptions = new XmlOutputProperties
                     {
                         RootElementName = "Root",
                         RowElementName = "Row",
@@ -198,7 +200,7 @@ namespace Frends.Community.Postgre.Tests
                 var output = new OutputProperties
                 {
                     ReturnType = Enums.QueryReturnType.Json,
-                    JsonOutput = new JsonOutputProperties()
+                    JsonOptions = new JsonOutputProperties()
                     {
                         CultureInfo = "",
                     }
@@ -229,10 +231,12 @@ namespace Frends.Community.Postgre.Tests
                 var output = new OutputProperties
                 {
                     ReturnType = Enums.QueryReturnType.Csv,
-                    CsvOutput = new CsvOutputProperties()
+                    CsvOptions = new CsvOutputProperties()
                     {
                         IncludeHeaders = false,
-                        FieldDelimiter = Enums.CsvFieldDelimiter.Semicolon
+                        FieldDelimiter = Enums.CsvFieldDelimiter.Semicolon,
+                        AddQuotesToDates = true,
+                        DateFormat = "yyyy-MM-dd"
                     }
                 };
 
@@ -242,6 +246,9 @@ namespace Frends.Community.Postgre.Tests
 
                 
                 Assert.IsTrue(result.Output.Contains("1"));
+                var date = DateTime.Now.ToString("yyyy-MM-dd");
+                TestContext.Out.WriteLine($"RESULT: {result.Output}");
+                Assert.IsTrue(result.Output.Contains(date));
             }
 
             [Test]

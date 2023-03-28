@@ -18,18 +18,18 @@ namespace Frends.Community.Postgre.Definitions
         /// Xml specific output properties.
         /// </summary>
         [UIHint(nameof(ReturnType), "", Enums.QueryReturnType.Xml)]
-        public XmlOutputProperties XmlOutput { get; set; }
+        public XmlOutputProperties XmlOptions { get; set; }
 
         /// <summary>
         /// Json specific output properties.
         /// </summary>
         [UIHint(nameof(ReturnType), "", Enums.QueryReturnType.Json)]
-        public JsonOutputProperties JsonOutput { get; set; }
+        public JsonOutputProperties JsonOptions { get; set; }
 
         /// <summary>
         /// Csv specific output properties.
         /// </summary>
         [UIHint(nameof(ReturnType), "", Enums.QueryReturnType.Csv)]
-        public CsvOutputProperties CsvOutput { get; set; }
+        public CsvOutputProperties CsvOptions { get; set; }
     }
 }
