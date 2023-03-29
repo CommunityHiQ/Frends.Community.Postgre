@@ -273,7 +273,7 @@ namespace Frends.Community.Postgre.Tests
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
+                _ = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
 
                 Assert.IsTrue(File.Exists(path));
                 string fileData = File.ReadAllText(path);
@@ -310,9 +310,7 @@ namespace Frends.Community.Postgre.Tests
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
-
-                TestContext.Out.WriteLine($"RESULT: {result.Path}, {result.Rows}");
+                _ = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
 
                 Assert.IsTrue(File.Exists(path));
                 var fileData = JToken.Parse(File.ReadAllText(path));
@@ -348,7 +346,7 @@ namespace Frends.Community.Postgre.Tests
 
                 var options = new Options { ThrowErrorOnFailure = true };
 
-                var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
+                _ = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
 
                 Assert.IsTrue(File.Exists(path));
                 var fileData = File.ReadAllText(path);
