@@ -100,9 +100,6 @@ namespace Frends.Community.Postgre.Tests
 
                 var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine("RESULT: " + result.Output);
-
-
                 Assert.IsTrue(result.Output.Contains("<id>1</id>"));
                 Assert.IsTrue(result.Output.Contains("<id>2</id>"));
                 Assert.IsTrue(result.Output.Contains("<id>3</id>"));
@@ -133,8 +130,6 @@ namespace Frends.Community.Postgre.Tests
                 var options = new Options { ThrowErrorOnFailure = true };
 
                 var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
-
-                TestContext.Out.WriteLine("RESULT: " + result.Output);
 
                 var table = new XmlDocument();
                 table.LoadXml(result.Output.ToString());
@@ -173,7 +168,6 @@ namespace Frends.Community.Postgre.Tests
                 var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(result.Output);
-                TestContext.Out.WriteLine("RESULT: " + result.Output);
                 var node = doc.SelectSingleNode("/Root/Row[1]/id");
                 Assert.IsNotNull(node);
                 var value = node.SelectSingleNode("//id");
@@ -210,8 +204,6 @@ namespace Frends.Community.Postgre.Tests
 
                 var result = PostgreOperations.ExecuteQuery(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine("RESULT: " + result.Output);
-
                 Assert.IsTrue(result.Output.Contains("\"id\": 1"));
             }
 
@@ -247,7 +239,6 @@ namespace Frends.Community.Postgre.Tests
                 
                 Assert.IsTrue(result.Output.Contains("1"));
                 var date = DateTime.Now.ToString("yyyy-MM-dd");
-                TestContext.Out.WriteLine($"RESULT: {result.Output}");
                 Assert.IsTrue(result.Output.Contains(date));
             }
 
@@ -284,11 +275,8 @@ namespace Frends.Community.Postgre.Tests
 
                 var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine($"RESULT: {result.Path}, {result.Rows}");
-
                 Assert.IsTrue(File.Exists(path));
                 string fileData = File.ReadAllText(path);
-                TestContext.Out.WriteLine("Content: " + fileData);
 
                 Assert.IsTrue(fileData.Contains("1"));
                 Assert.IsTrue(fileData.Contains("2"));
@@ -328,7 +316,6 @@ namespace Frends.Community.Postgre.Tests
 
                 Assert.IsTrue(File.Exists(path));
                 var fileData = JToken.Parse(File.ReadAllText(path));
-                TestContext.Out.WriteLine("Content: " + fileData);
                 Assert.AreEqual(1, fileData[0]["id"].Value<int>());
                 Assert.AreEqual("Ensimmäinen", fileData[0]["selite"].Value<string>());
 
@@ -363,13 +350,10 @@ namespace Frends.Community.Postgre.Tests
 
                 var result = PostgreOperations.ExecuteQueryToFile(input, output, _connection, options, new CancellationToken()).Result;
 
-                TestContext.Out.WriteLine($"RESULT: {result.Path}, {result.Rows}");
-
                 Assert.IsTrue(File.Exists(path));
                 var fileData = File.ReadAllText(path);
 
                 XmlDocument doc = new XmlDocument();
-                TestContext.Out.WriteLine("Content: " + fileData);
                 doc.LoadXml(fileData);
                 
                 var node = doc.SelectSingleNode("/Root/Row[1]/id");
