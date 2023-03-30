@@ -125,6 +125,7 @@ namespace Frends.Community.Postgre.Definitions
 
         public static async Task<Tuple<int, string>> WriteToFileAsync(this NpgsqlCommand command, SaveQueryToFileProperties output, CancellationToken cancellationToken)
         {
+            var rows = 0;
             command.CommandType = CommandType.Text;
             var encoding = GetEncoding(output.Encoding, output.EncodingString, output.EnableBom);
             using (var reader = await command.ExecuteReaderAsync(cancellationToken) as NpgsqlDataReader)
@@ -132,16 +133,16 @@ namespace Frends.Community.Postgre.Definitions
                 switch (output.ReturnType)
                 {
                     case Enums.QueryReturnType.Csv:
-                        CsvFileWriter.ToCsvFile(reader, output, encoding, cancellationToken);
+                        rows = CsvFileWriter.ToCsvFile(reader, output, encoding, cancellationToken);
                         break;
                     case Enums.QueryReturnType.Xml:
-                        await XmlFileWriter.ToXmlFile(reader, output, encoding, cancellationToken);
+                        rows = await XmlFileWriter.ToXmlFile(reader, output, encoding, cancellationToken);
                         break;
                     case Enums.QueryReturnType.Json:
-                        await JsonFileWriter.ToJsonFileAsync(reader, output, encoding, cancellationToken);
+                        rows = await JsonFileWriter.ToJsonFileAsync(reader, output, encoding, cancellationToken);
                         break;
                 }
-                return new Tuple<int, string>(reader.RecordsAffected, output.Path);
+                return new Tuple<int, string>(rows, output.Path);
             }
         }
 

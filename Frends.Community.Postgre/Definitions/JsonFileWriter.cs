@@ -10,8 +10,9 @@ namespace Frends.Community.Postgre.Definitions
 {
     internal static class JsonFileWriter
     {
-        public static async Task ToJsonFileAsync(NpgsqlDataReader reader, SaveQueryToFileProperties output, Encoding encoding, CancellationToken cancellationToken)
+        public static async Task<int> ToJsonFileAsync(NpgsqlDataReader reader, SaveQueryToFileProperties output, Encoding encoding, CancellationToken cancellationToken)
         {
+            var rows = 0;
             var culture = string.IsNullOrWhiteSpace(output.JsonOptions.CultureInfo) ? CultureInfo.InvariantCulture : new CultureInfo(output.JsonOptions.CultureInfo);
             using (var fileWriter = new StreamWriter(output.Path, output.Append, encoding))
             using (var writer = new JsonTextWriter(fileWriter))
@@ -36,11 +37,13 @@ namespace Frends.Community.Postgre.Definitions
                     }
 
                     await writer.WriteEndObjectAsync(cancellationToken); // end row object
+                    rows++;
                 }
 
                 // end array
                 await writer.WriteEndArrayAsync(cancellationToken);
             }
+            return rows;
         }
     }
 }
