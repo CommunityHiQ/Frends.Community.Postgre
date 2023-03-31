@@ -11,8 +11,9 @@ namespace Frends.Community.Postgre.Definitions
 {
     internal static class CsvFileWriter
     {
-        public static void ToCsvFile(NpgsqlDataReader reader, SaveQueryToFileProperties output, Encoding encoding, CancellationToken cancellationToken)
+        public static int ToCsvFile(NpgsqlDataReader reader, SaveQueryToFileProperties output, Encoding encoding, CancellationToken cancellationToken)
         {
+            var rows = 0;
             using (var writer = new StreamWriter(output.Path, output.Append, encoding))
             {
                 var csvOptions = new Configuration
@@ -22,13 +23,14 @@ namespace Frends.Community.Postgre.Definitions
                 using (var csvFile = new CsvWriter(writer, csvOptions))
                 {
                     writer.NewLine = output.CsvOptions.GetLineBreakAsString();
-                    DataReaderToCsvWriter(reader, csvFile, output.CsvOptions, cancellationToken);
+                    rows = DataReaderToCsvWriter(reader, csvFile, output.CsvOptions, cancellationToken);
                     csvFile.Flush();
                 }
             }
+            return rows;
         }
 
-        internal static void DataReaderToCsvWriter(NpgsqlDataReader reader, CsvWriter csvWriter, CsvOutputProperties options, CancellationToken cancellationToken)
+        internal static int DataReaderToCsvWriter(NpgsqlDataReader reader, CsvWriter csvWriter, CsvOutputProperties options, CancellationToken cancellationToken)
         {
             // Write header and remember column indexes to include
             var columnIndexesToInclude = new List<int>();
@@ -53,6 +55,8 @@ namespace Frends.Community.Postgre.Definitions
 
             if (options.IncludeHeaders) csvWriter.NextRecord();
 
+            var rows = 0;
+
             while (reader.Read())
             {
                 foreach (var columnIndex in columnIndexesToInclude)
@@ -65,7 +69,10 @@ namespace Frends.Community.Postgre.Definitions
                     csvWriter.WriteField(formattedValue, false);
                 }
                 csvWriter.NextRecord();
+                rows++;
             }
+
+            return rows;
         }
     }
 }

@@ -147,7 +147,7 @@ Newlines in text fields are replaced with spaces.
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | Path | string | Path to the output file | ´c:\temp\temp.csv´ |
-| Rows | int | RowAffected on select default value is always -1 if rows were fetched. | -1 |
+| Rows | int | Rows fetched from the database. Headers are not counted to the rows. | 4 |
 | Success        | bool     | Result if the task succeeded	| true |
 | Message        | string   | Error message if Throw error on failure is set to 'False'	| XString |
 
@@ -191,4 +191,5 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 1.2.1 | Converted to support .Net Standard and .Net Framework 4.7.1 |
 | 1.3.1 | Fixed issue #4: Parameter can\'t be NULL by creating parameter.Value check and changing the value to DBNull.Value if null | 
 | 2.0.0 | Refactored the task and added new task ExecuteQueryToFile which handles all three datatypes. |
+| 2.0.1 | Fixed issue with ExecuteQueryToFile Result's Rows value not being implemented correctly and updated the npsql dependency version to 6.0.5. |
 

@@ -9,8 +9,9 @@ namespace Frends.Community.Postgre.Definitions
 {
     internal static class XmlFileWriter
     {
-        public static async Task ToXmlFile(NpgsqlDataReader reader, SaveQueryToFileProperties output, Encoding encoding, CancellationToken cancellationToken)
+        public static async Task<int> ToXmlFile(NpgsqlDataReader reader, SaveQueryToFileProperties output, Encoding encoding, CancellationToken cancellationToken)
         {
+            var rows = 0;
             using (var writer = new StreamWriter(output.Path, output.Append, encoding))
             using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { Async = true, Indent = true }))
             {
@@ -29,6 +30,7 @@ namespace Frends.Community.Postgre.Definitions
 
                     // close single row element container
                     await xmlWriter.WriteEndElementAsync();
+                    rows++;
 
                     // write only complete elements, but stop if process was terminated
                     cancellationToken.ThrowIfCancellationRequested();
@@ -37,6 +39,8 @@ namespace Frends.Community.Postgre.Definitions
                 await xmlWriter.WriteEndElementAsync();
                 await xmlWriter.WriteEndDocumentAsync();
             }
+
+            return rows;
         }
     }
 }
