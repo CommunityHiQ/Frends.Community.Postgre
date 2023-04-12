@@ -118,7 +118,7 @@ namespace Frends.Community.Postgre.Definitions
             using (var reader = await command.ExecuteReaderAsync(cancellationToken))
             using (var writer =  new StringWriter() as TextWriter)
             {
-                await DataReaderToCsvString(reader, writer, output.CsvOptions, cancellationToken);
+                await DataReaderToCsvString((NpgsqlDataReader)reader, writer, output.CsvOptions, cancellationToken);
                 return writer.ToString();
             }
         }
