@@ -193,3 +193,4 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 2.0.0 | Refactored the task and added new task ExecuteQueryToFile which handles all three datatypes. |
 | 2.0.1 | Fixed issue with ExecuteQueryToFile Result's Rows value not being implemented correctly and updated the npsql dependency version to 6.0.5. |
 | 2.1.0 | Rollbacked the npgsql package version and added more dependencies to the csproj file for the task to work on legacy Agents |
+| 2.1.1 | Rollbacked the npgsql package version for the task to work on legacy Agents |
