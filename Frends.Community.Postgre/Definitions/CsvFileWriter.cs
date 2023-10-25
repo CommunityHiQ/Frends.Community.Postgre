@@ -36,6 +36,7 @@ namespace Frends.Community.Postgre.Definitions
             var columnIndexesToInclude = new List<int>();
             for (var i = 0; i < reader.FieldCount; i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var columnName = reader.GetName(i);
                 var includeColumn =
                     options.ColumnsToInclude == null ||
@@ -61,6 +62,7 @@ namespace Frends.Community.Postgre.Definitions
             {
                 foreach (var columnIndex in columnIndexesToInclude)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     var dbType = reader.GetFieldType(columnIndex);
                     var dbTypeName = reader.GetDataTypeName(columnIndex);
                     var value = reader.GetValue(columnIndex);
