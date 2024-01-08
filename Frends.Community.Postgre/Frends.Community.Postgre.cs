@@ -21,7 +21,7 @@ namespace Frends.Community.Postgre
         /// <param name="connectionInfo"></param>
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>Object { bool Success, string Message, string Result } </returns>
+        /// <returns>Object { bool Success, string Message, string Output } </returns>
         public static async Task<QueryResult> ExecuteQuery([PropertyTab] QueryParameters queryParameters, [PropertyTab] OutputProperties output, [PropertyTab] ConnectionInformation connectionInfo, [PropertyTab] Options options, CancellationToken cancellationToken)
         {
             try
@@ -100,7 +100,7 @@ namespace Frends.Community.Postgre
         /// <param name="connectionInfo"></param>
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>Object { bool Success, string Message, string Result } </returns>
+        /// <returns>Object { bool Success, string Message, int Rows, string Path } </returns>
         public static async Task<QueryToFileResult> ExecuteQueryToFile([PropertyTab] QueryParameters queryParameters, [PropertyTab] SaveQueryToFileProperties output, [PropertyTab] ConnectionInformation connectionInfo, [PropertyTab] Options options, CancellationToken cancellationToken)
         {
             try
