@@ -196,3 +196,4 @@ NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 | 2.1.1 | Rollbacked the npgsql package version for the task to work on legacy Agents |
 | 2.1.2 | Added cancellationToken check for the DataReaderToCsvWriter method where it was never used. |
 | 2.1.3 | Updated result documentation to ExecuteQuery and ExecuteQueryToFile Tasks. |
+| 2.2.0 | Targeted to .NET6 and .NET8 and updated the Npgsql, System.ComponentModel.Annotations, CsvHelper, System.Text.Encoding.CodePages and System.Threading.Tasks.Extensions packages. |
