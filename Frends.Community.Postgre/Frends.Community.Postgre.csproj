@@ -22,8 +22,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="Npgsql" Version="4.1.14" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-	<PackageReference Include="CsvHelper" Version="13.0.3" />
-	<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+	<PackageReference Include="CsvHelper" Version="33.0.1" />
+	<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
   </ItemGroup>
 
