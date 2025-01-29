@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using CsvHelper;
 using CsvHelper.Configuration;
+using System.Globalization;
 
 namespace Frends.Community.Postgre.Definitions
 {
@@ -16,7 +17,7 @@ namespace Frends.Community.Postgre.Definitions
             var rows = 0;
             using (var writer = new StreamWriter(output.Path, output.Append, encoding))
             {
-                var csvOptions = new Configuration
+                var csvOptions = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
                     Delimiter = output.CsvOptions.GetFieldDelimiterAsString(),
                 };
